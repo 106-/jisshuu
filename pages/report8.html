@@ -1,0 +1,284 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>第八回レポート</title>
+<link rel="stylesheet" href="css/watery-blue/wiki.css" type="text/css">
+</head>
+<body>
+<h1>第八回レポート</h1>
+<h3><a name="i0">1.sshとは?</a></h3>
+<p class="hatena">
+sshとは、暗号を利用して安全に他のコンピュータをリモート操作するためのプロトコルや、それを利用したコマンドのことを言う。</p>
+<h3><a name="i1">2.コマンド</a></h3>
+<dl>
+  <dt>ssh</dt>
+  <dd>sshを利用して他のコンピュータへログインする</dd>
+</dl>
+<pre class="verbatim-soft">
+$ ssh 106@133.24.255.82
+</pre>
+<table>
+<tr>
+  <td>-i</td>
+  <td>公開鍵認証を利用する。オプションの後に秘密鍵へのパスを指定する。</td>
+</tr>
+<tr>
+  <td>-p</td>
+  <td>ポート番号の指定</td>
+</tr>
+<tr>
+  <td>-x/-X</td>
+  <td>X11の転送(リモートのウィンドウをローカルで開く手段)を有効/無効にする。大文字で有効、小文字で無効</td>
+</tr>
+<tr>
+  <td>-4/-6</td>
+  <td>IPv4/6の指定</td>
+</tr>
+<tr>
+  <td>-g</td>
+  <td>ポートフォワード機能を外部から利用できるかの設定 詳しくは10番で</td>
+</tr>
+</table>
+<dl>
+  <dt>slogin</dt>
+  <dd>sshコマンドと同じ。内部でもsshへのリンクとなっている。</dd>
+</dl>
+<pre class="verbatim-soft">
+lrwxrwxrwx 1 root root 5  6月  5 13:36 /usr/bin/slogin -> ./ssh*
+</pre>
+<dl>
+  <dt>scp</dt>
+  <dd>接続先へファイルをコピーする</dd>
+</dl>
+<p class="hatena">
+利用例は12番参照</p>
+<p class="hatena">
+sshコマンドの欄で挙げたオプションが同じように使える。</p>
+<table>
+<tr>
+  <td>-C</td>
+  <td>通信を圧縮する</td>
+</tr>
+<tr>
+  <td>-r</td>
+  <td>ディレクトリ内もコピーする時に指定</td>
+</tr>
+</table>
+<dl>
+  <dt>sftp</dt>
+  <dd>sshの上でftpに似たプロトコルでファイルをやり取りするコマンド</dd>
+</dl>
+<p class="hatena">
+利用例は12番参照</p>
+<p class="hatena">
+ -pオプションは使えない。-oオプションを使ってポートを指定する。</p>
+<dl>
+  <dt>ssh-keygen</dt>
+  <dd>公開鍵認証で使う鍵を生成する。</dd>
+</dl>
+<pre class="verbatim-soft">
+$ ssh-keygen -t (鍵の種類)
+</pre>
+<p class="hatena">
+鍵の指紋を見たい場合</p>
+<pre class="verbatim-soft">
+$ ssh-keygen -lf (鍵のパス)
+</pre>
+<h3><a name="i2">3.共通鍵暗号と公開鍵暗号の比較</a></h3>
+<dl>
+  <dt>共通鍵暗号</dt>
+  <dd>暗号化/復号化に使う鍵が同じ暗号。情報の送り手と受け手が遠く離れた場所にいるとき、安全に鍵を渡す手段がない。</dd>
+  <dt>公開鍵暗号</dt>
+  <dd>暗号化/復号化に使う鍵が違う暗号。方法が複雑で理解しがたいが、不特定多数の相手に対し公開鍵をばらまくことができるため、誰とでも安全な通信ができる。</dd>
+</dl>
+<h3><a name="i3">4.共通鍵を安全に生成する方法</a></h3>
+<p class="hatena">
+Diffie-Hellman鍵共有という方法で共通鍵を生成・交換する。</p>
+<p class="hatena">
+最初にpとqという2つの値を決める。pは素数、qはp>qとなる自然数にする。</p>
+<p class="hatena">
+情報をやり取りする二者はそれぞれでqを何乗かにする。</p>
+<p class="hatena">
+qをpで割った余りを二者で交換する。</p>
+<p class="hatena">
+交換した値を再び先ほどと同じ数で何乗かにする。</p>
+<p class="hatena">
+それをpで割った余りは二者とも同じ値であるので、これを共通鍵とする。</p>
+<h3><a name="i4">5.公開鍵認証の原理</a></h3>
+<p class="hatena">
+公開鍵認証には秘密鍵と公開鍵という2つの鍵を利用する。公開鍵は暗号化専用の鍵、秘密鍵は復号化専用の鍵である(RSA鍵の場合を除く)。</p>
+<p class="hatena">
+まず公開鍵をデータの送り手に送信する。公開鍵は暗号化専用の鍵であるので第三者に盗聴されていても問題ない。</p>
+<p class="hatena">
+送り手は公開鍵でデータを暗号化し、それを送信する。暗号化されているので当然ながらここで盗聴しても復号できない。</p>
+<p class="hatena">
+受け手は秘密鍵で復号する。こうして二者の間で安全な通信が実現する。</p>
+<h3><a name="i5">6.公開鍵認証とパスワード認証の比較</a></h3>
+<p class="hatena">
+パスワード認証は自分がパスワードを覚えて入ればどこからでもログインすることができる。しかしパスワードが他人に知られてしまった場合、他人がログインすることを許してしまうため危険である。</p>
+<p class="hatena">
+公開鍵認証は秘密鍵ファイルを指定すればパスワード無しでログインすることができるため、スクリプトの中からの接続がしやすい。しかし逆を言えば鍵が無ければどこからでも入れないため、不便である。</p>
+<h3><a name="i6">7.RSA鍵、DSA鍵、ECDSA鍵、ED25519鍵の数学的な原理</a></h3>
+<dl>
+  <dt>RSA鍵</dt>
+  <dd>素数同士の掛け算は素因数分解しづらいことで実現している鍵方式。公開鍵と秘密鍵が逆にも使える。</dd>
+  <dt>DSA鍵</dt>
+  <dd>離散対数問題(y=g^x mod pのxをyから求めるのが難しい)から公開鍵認証を実現している。</dd>
+  <dt>ECDSA鍵</dt>
+  <dd>DSAの強化版。楕円曲線上の離散対数問題(調べたが分からなかった)を応用している。同じ強度の暗号だとしてもDSAよりも短い長さの公開鍵で済む。</dd>
+  <dt>ED25519鍵</dt>
+  <dd>ツイストしたエドワーズ曲線(Twisted Edwards curve:ax^2+y^2=1+dx^2y^2 という数式で表される曲線らしいが詳しいことは分からなかった)を利用した鍵である。</dd>
+</dl>
+<h3><a name="i7">8.opensshの手動アップデート</a></h3>
+<pre class="verbatim-soft">
+$ wget <a href="http://updates.vinelinux.org/apt/VineSeed/SRPMS.main/openssh-6.7p1-1vl7.src.rpm">http://updates.vinelinux.org/apt/VineSeed/SRPMS.main/openssh-6.7p1-1vl7.src.rpm</a>
+$ sudo rpm --rebuild openssh-6.7p1-1vl7.src.rpm
+</pre>
+<p class="hatena">
+いくつかのモジュールが足りないと言われるのでインストールする</p>
+<pre class="verbatim-soft">
+$ sudo apt-get install db4-devel pam-devel libedit-devel
+$ sudo rpm --rebuild openssh-6.7p1-1vl7.src.rpm
+$ cd ~/rpm/RPMS/x86_64
+$ sudo rpm -Uvh openssh-*.rpm
+$ ssh -V
+OpenSSH_6.7p1, OpenSSL 1.0.1m 19 Mar 2015
+</pre>
+<h3><a name="i8">9.ED25519鍵認証で自分以外のサーバにログインできるようにする</a></h3>
+<pre class="verbatim-soft">
+$ ssh-keygen -t ed25519
+Generating public/private ed25519 key pair.
+Enter file in which to save the key (/home/106/.ssh/id_ed25519): (そのままEnter)
+Enter passphrase (empty for no passphrase): (そのままEnter)
+Enter same passphrase again: (そのままEnter)
+Your identification has been saved in /home/106/id_ed25519.
+Your public key has been saved in /home/106/id_ed25519.pub.
+The key fingerprint is:
+8c:7d:ea:70:4d:31:a1:df:db:83:50:06:fe:4f:6a:c3 106@jisshuu2
+The key's randomart image is:
+ +--[ED25519 256]--+
+(略)
+ +-----------------+
+</pre>
+<p class="hatena">
+.sshフォルダにコピーする。</p>
+<pre class="verbatim-soft">
+$ cp ./id_ed25519 ./.ssh/authorized_keys
+$ cp ./id_ed25519.pub ./.ssh/authorized_keys.pub
+</pre>
+<p class="hatena">
+公開鍵認証を有効にする。</p>
+<pre class="verbatim-soft">
+$ nano /etc/ssh/sshd_config
+(略)
+PubkeyAuthentication yes	//コメントアウトを外す
+(略)
+</pre>
+<p class="hatena">
+ssh-copy-idコマンドを利用して、鍵ファイルをリモートにコピーする。</p>
+<pre class="verbatim-soft">
+$ ssh-copy-id -i ~/.ssh/authorized_keys 106@133.24.255.81
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+106@133.24.255.81's password: 
+Number of key(s) added: 1
+Now try logging into the machine, with:   "ssh '106@133.24.255.81'"
+and check to make sure that only the key(s) you wanted were added.
+</pre>
+<h3><a name="i9">10.sshのポートフォワード機能とは?</a></h3>
+<p class="hatena">
+sshのポートフォワードとは、sshサーバの指定したポートに届いた通信を、別のサーバに転送する機能である。</p>
+<p class="hatena">
+ポートフォワードにはローカル/リモートの2つが存在する。</p>
+<p class="hatena">
+sshだけでなくhttpやsmtpなどにも使える</p>
+<ul class="list1">
+  <li>リモート</li>
+</ul>
+<p class="hatena">
+リモートコンピュータの特定ポートへの接続を自分に転送する。</p>
+<pre class="verbatim-soft">
+(133.24.255.82で)
+$ ssh -R 10000:133.24.255.82:22 106@133.24.255.81
+106@133.24.255.81's password:
+Last login: (略)
+</pre>
+<pre class="verbatim-soft">
+(133.24.255.80で)
+$ ssh 106@133.24.255.81
+106@133.24.255.81's password:
+Last login: (略)
+$ ssh 106@localhost -p 10000	//ここでのlocalhostは133.24.255.81を指している
+106@localhost's password:
+Last login: (略)
+いらっしゃいませこんにちは
+(略)
+</pre>
+<p class="hatena">
+ちなみに、外部から直接はいることは出来ない。ポートを飛ばした先にログインする必要がある。</p>
+<pre class="verbatim-soft">
+$ ssh 106@133.24.255.81 -p 10000
+ssh: connect to host 133.24.255.81 port 10000: No route to host
+</pre>
+<ul class="list1">
+  <li>ローカル</li>
+</ul>
+<p class="hatena">
+自分の特定ポートへの接続を他のコンピュータへ転送する。</p>
+<pre class="verbatim-soft">
+$ ssh -L 10000:133.24.255.81:80 106@133.24.255.82
+106@133.24.255.82's password:
+Last login: (略)
+いらっしゃいませこんにちは
+</pre>
+<p class="hatena">
+この状態で、133.24.255.82上で'wget <a href="http://localhost:10000/'">http://localhost:10000/'</a> すると、133.24.255.81のwebページが表示される。</p>
+<br>
+<p class="hatena">
+また、sshには-gというオプションが存在し、これを使えば外部からの接続を許すことができる。</p>
+<pre class="verbatim-soft">
+(133.24.255.82上でファイアウォールの設定をして、10000ポートを開いた後に)
+$ ssh -L 10000:133.24.255.81:80 -g 106@133.24.255.82
+(略)
+</pre>
+<p class="hatena">
+この状態で<a href="http://133.24.255.82:10000/">http://133.24.255.82:10000/</a> を開くと、全てのコンピュータから133.24.255.81のwebページを見ることができる。</p>
+<h3><a name="i10">11.sshのポートフォワードを通してXを使う</a></h3>
+<p class="hatena">
+sshコマンドにオプション"-X"をつける</p>
+<pre class="verbatim-soft">
+$ ssh -X -i ~/.ssh/authorized_keys 106@133.24.255.81
+$ gnome-terminal
+(リモートの端末が表示される)
+</pre>
+<h3><a name="i11">12.sftp,scpを用いてファイル転送</a></h3>
+<ul class="list1">
+  <li>scp</li>
+</ul>
+<pre class="verbatim-soft">
+$ scp (コピー元) (ユーザ名)@(ホスト):(コピー先)
+$ scp ./.ssh/authorized_keys 106@133.24.255.82:~/.ssh/authorized_keys 
+106@133.24.255.82's password: 
+authorized_keys                               100%  493     0.5KB/s   00:00 
+</pre>
+<ul class="list1">
+  <li>sftp</li>
+</ul>
+<pre class="verbatim-soft">
+$ sftp 106@133.24.255.82
+106@133.24.255.82's password: 
+Connected to 133.24.255.82.
+sftp> cd .ssh
+sftp> put /home/106/.ssh/authorized_keys
+Uploading /home/106/.ssh/authorized_keys to /home/106/.ssh/authorized_keys
+/home/106/.ssh/authorized_keys                  0%    0     0.0KB/s   --:-- ETA
+sftp> bye
+</pre>
+
+<hr>
+<div class="footer">
+Generated by <a href="http://www2u.biglobe.ne.jp/~MAS/soft.html#htwiki">ひとりWiki</a> version 2.5.0
+</div>
+</body>
+</html>

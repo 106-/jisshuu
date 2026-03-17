@@ -1,0 +1,359 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>第九回レポート</title>
+<link rel="stylesheet" href="css/watery-blue/wiki.css" type="text/css">
+</head>
+<body>
+<h1>第九回レポート</h1>
+<h3><a name="i0">1.ポートとは?</a></h3>
+<p class="hatena">
+ポートにはいくつかの意味があるが、一番良く使われているであろうものはTCP/UDPのポートである。</p>
+<p class="hatena">
+サーバとして動くプログラムはそれぞれ一つのポートを持ち、そのポートを監視する。</p>
+<p class="hatena">
+httpやsmtp、sshなどのプログラムが使うポートはwell-known portと言われており、殆どの場合決まっている。</p>
+<h3><a name="i1">2.デーモンとは?</a></h3>
+<p class="hatena">
+デーモンとは、OSが自動的に起動しているプログラムのことである。バックグラウンドプロセスとして裏側で動いているため、ユーザが直接触ることはできない。</p>
+<p class="hatena">
+デーモンとして動く大抵のプログラムは名前の後ろに"d"が付いている。(sshd, httpd, smtpdなど)</p>
+<h3><a name="i2">3.ランレベルとは?</a></h3>
+<p class="hatena">
+ランレベルとはシステムの状態のことである。</p>
+<p class="hatena">
+それぞれのランレベルによって違うデーモンを起動するようになっている。</p>
+<p class="hatena">
+ランレベルはは0-6の数字で表されていて、runlevelコマンドを入力すると現在のランレベルを表示することができる。ランレベルの一覧を載せる。</p>
+<table>
+<tr>
+  <td>0</td>
+  <td>システムの終了</td>
+</tr>
+<tr>
+  <td>1</td>
+  <td>シングルユーザモード</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td>マルチユーザモード(NFSなし)</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td>マルチユーザモード</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td>(使用されていない)</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td>ディスプレイマネージャ使用</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td>システムの再起動</td>
+</tr>
+</table>
+<p class="hatena">
+大体のデーモンは2-5までのランレベルで起動するようになっている。</p>
+<h3><a name="i3">4.inetdやxinetdの目的と役割</a></h3>
+<p class="hatena">
+inetdとは、必要のないデーモンがメモリを無駄に消費することを改善すべく作られたデーモンである。</p>
+<p class="hatena">
+具体的には、アクセスのないサーバは止めておいて、指定したポートにアクセスされたらそのサーバを起動するという手段をとっている。</p>
+<p class="hatena">
+しかし、アクセスされてからサーバを起動するため若干の遅延が生じてしまうことがデメリットである。</p>
+<p class="hatena">
+そしてxinetdはそのinitdをセキュアにしたバージョンである。</p>
+<h3><a name="i4">5.tcpdの目的と役割</a></h3>
+<p class="hatena">
+tcpdとは、inetdとそれぞれのデーモンの間に存在するTCP Wrapperと言われているものである。</p>
+<p class="hatena">
+inetdで動いているデーモンに対して、/etc/hosts.allowと/etc/hosts.denyファイルに基づくアクセス制限やアクセスの記録を行う。</p>
+<h3><a name="i5">6.インストール済デーモンの名前と目的と役割</a></h3>
+<p class="hatena">
+nmapコマンドを使う。</p>
+<pre class="verbatim-soft">
+$ nmap -A 127.0.0.1
+Starting Nmap 5.51 ( <a href="http://nmap.org">http://nmap.org</a> ) at 2015-06-18 15:59 JST
+Nmap scan report for localhost (127.0.0.1)
+Host is up (0.00026s latency).
+Not shown: 986 closed ports
+PORT     STATE SERVICE    VERSION
+22/tcp   open  ssh        OpenSSH 6.7 (protocol 2.0)
+25/tcp   open  smtp       Postfix smtpd
+53/tcp   open  domain     ISC BIND BigCore Mk-II
+| dns-zone-transfer: 
+| localhost  SOA   localhost root.localhost
+| localhost  NS    localhost
+| localhost  A     127.0.0.1
+|_localhost  SOA   localhost root.localhost
+80/tcp   open  http       Apache httpd 2.2.29
+| http-methods: Potentially risky methods: TRACE
+|_See <a href="http://nmap.org/nsedoc/scripts/http-methods.html">http://nmap.org/nsedoc/scripts/http-methods.html</a>
+|_http-title: Linux\xE5\xAE\x9F\xE7\xBF\x922\xE5\x8F\xB7\xE6\xA9\x9F\xE3\x81\xAE\xE3\x83\x9A\xE3\x83\xBC\xE3\x82\xB8
+81/tcp   open  http       nginx 1.6.2
+|_http-methods: No Allow or Public header in OPTIONS response (status code 405)
+|_http-title: Test Page for the Nginx HTTP Server on Vine Linux
+106/tcp  open  http-proxy Squid webproxy 3.1.23
+| http-open-proxy: Potentially OPEN proxy.
+|_Methods supported: GET
+111/tcp  open  rpcbind
+443/tcp  open  ssl/http   Apache httpd 2.2.29
+| http-methods: Potentially risky methods: TRACE
+|_See <a href="http://nmap.org/nsedoc/scripts/http-methods.html">http://nmap.org/nsedoc/scripts/http-methods.html</a>
+|_http-title: ALTERNATIVES
+|_sslv2: server still supports SSLv2
+465/tcp  open  ssl/smtp   Postfix smtpd
+631/tcp  open  ipp        CUPS 1.4
+| http-robots.txt: 1 disallowed entry 
+|_/
+| http-methods: Potentially risky methods: PUT
+|_See <a href="http://nmap.org/nsedoc/scripts/http-methods.html">http://nmap.org/nsedoc/scripts/http-methods.html</a>
+993/tcp  open  ssl/imap   Dovecot imapd
+|_imap-capabilities: LOGIN-REFERRALS AUTH=PLAIN IMAP4rev1 ENABLE AUTH=LOGIN LITERAL+ IDLE SASL-IR ID
+995/tcp  open  ssl/pop3   Dovecot pop3d
+|_pop3-capabilities: OK(K) CAPA RESP-CODES UIDL PIPELINING USER TOP SASL(PLAIN LOGIN)
+2049/tcp open  rpcbind
+3306/tcp open  mysql      MySQL 5.1.73
+| mysql-info: Protocol: 10
+| Version: 5.1.73
+| Thread ID: 1694
+| Some Capabilities: Long Passwords, Connect with DB, Compress, ODBC, Transactions, Secure Connection
+| Status: Autocommit
+|_Salt: /-3XD*DYqOw)a1nWIIr%
+Service Info: Host: jisshuu2.elec.e.yamagata-u.ac.jp; OS: Linux
+Service detection performed. Please report any incorrect results at <a href="http://nmap.org/submit/">http://nmap.org/submit/</a> .
+Nmap done: 1 IP address (1 host up) scanned in 37.08 seconds
+</pre>
+<table>
+<tr>
+  <td>ポート番号</td>
+  <td>プロトコル</td>
+  <td>名前</td>
+  <td>役割</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td>ssh</td>
+  <td>OpenSSH 6.7 (protocol 2.0)</td>
+  <td>sshでの接続を受け付けるデーモン</td>
+</tr>
+<tr>
+  <td>25</td>
+  <td>smtp</td>
+  <td>Postfix smtpd</td>
+  <td>メールの送受信を行うデーモン</td>
+</tr>
+<tr>
+  <td>53</td>
+  <td>domain</td>
+  <td>ISC BIND BigCore Mk-II</td>
+  <td>DNSの応答をするデーモン</td>
+</tr>
+<tr>
+  <td>80</td>
+  <td>http</td>
+  <td>Apache httpd 2.2.29</td>
+  <td>httpサーバのデーモン</td>
+</tr>
+<tr>
+  <td>81</td>
+  <td>http</td>
+  <td>nginx 1.6.2</td>
+  <td>httpサーバのデーモン</td>
+</tr>
+<tr>
+  <td>106</td>
+  <td>http-proxy</td>
+  <td>Squid webproxy 3.1.23</td>
+  <td>プロキシサーバのデーモン</td>
+</tr>
+<tr>
+  <td>111</td>
+  <td>rpcbind</td>
+  <td>rpcbind</td>
+  <td>NFS(ネットワークを通じてファイルをやりとりするためのプロトコル)に使われているデーモン</td>
+</tr>
+<tr>
+  <td>443</td>
+  <td>ssl/http</td>
+  <td>Apache httpd 2.2.29</td>
+  <td>sslでhttpのやり取りをするデーモン</td>
+</tr>
+<tr>
+  <td>465</td>
+  <td>ssl/smtp</td>
+  <td>Postfix smtpd</td>
+  <td>sslでsmtpのやり取りをするデーモン</td>
+</tr>
+<tr>
+  <td>631</td>
+  <td>ipp</td>
+  <td>CUPS 1.4</td>
+  <td>プリントサーバ</td>
+</tr>
+<tr>
+  <td>993</td>
+  <td>ssl/imap</td>
+  <td>Dovecot imapd</td>
+  <td>メールサーバからメールを読み出すためのデーモン</td>
+</tr>
+<tr>
+  <td>995</td>
+  <td>ssl/pop3</td>
+  <td>Dovecot pop3d</td>
+  <td>メールサーバからメールを読み出すためのデーモン imapとの違いは、メールをサーバに残すかどうかというところにあるらしい。</td>
+</tr>
+<tr>
+  <td>3306</td>
+  <td>mysql</td>
+  <td>MySQL 5.1.73</td>
+  <td>データベースサーバ</td>
+</tr>
+</table>
+<h3><a name="i6">7.コマンドの使用方法</a></h3>
+<dl>
+  <dt>netstat</dt>
+  <dd>現在行われている通信などを表示するコマンド</dd>
+</dl>
+<table>
+<tr>
+  <td>-t</td>
+  <td>tcpのポートに限定する</td>
+</tr>
+<tr>
+  <td>-u</td>
+  <td>udpのポートに限定する</td>
+</tr>
+<tr>
+  <td>-p</td>
+  <td>プログラムのPID/プロセス名を表示する</td>
+</tr>
+<tr>
+  <td>-l</td>
+  <td>LISTEN状態にあるポートのみを表示する。</td>
+</tr>
+</table>
+<pre class="verbatim-soft">
+$ netstat -tl
+稼働中のインターネット接続 (サーバーのみ)
+Proto 受信-Q 送信-Q 内部アドレス            外部アドレス            状態
+tcp        0      0 localhost:ipp           *:*                     LISTEN
+tcp        0      0 *:smtp                  *:*                     LISTEN
+tcp        0      0 *:53694                 *:*                     LISTEN
+tcp        0      0 *:imaps                 *:*                     LISTEN
+tcp        0      0 *:nfs                   *:*                     LISTEN
+tcp        0      0 *:pop3s                 *:*                     LISTEN
+tcp        0      0 *:47077                 *:*                     LISTEN
+tcp        0      0 *:48777                 *:*                     LISTEN
+tcp        0      0 *:mysql                 *:*                     LISTEN
+tcp        0      0 *:rquotad               *:*                     LISTEN
+tcp        0      0 *:sunrpc                *:*                     LISTEN
+tcp        0      0 *:mountd                *:*                     LISTEN
+tcp        0      0 *:urd                   *:*                     LISTEN
+tcp        0      0 *:81                    *:*                     LISTEN
+tcp        0      0 www.elec.e.yamag:domain *:*                     LISTEN
+tcp        0      0 localhost:domain        *:*                     LISTEN
+tcp        0      0 *:ssh                   *:*                     LISTEN
+tcp        0      0 ::1%6455456:ipp         *:*                     LISTEN
+tcp        0      0 *:https                 *:*                     LISTEN
+tcp        0      0 *:imaps                 *:*                     LISTEN
+tcp        0      0 *:nfs                   *:*                     LISTEN
+tcp        0      0 *:50081                 *:*                     LISTEN
+tcp        0      0 *:pop3s                 *:*                     LISTEN
+tcp        0      0 *:poppassd              *:*                     LISTEN
+tcp        0      0 *:42986                 *:*                     LISTEN
+tcp        0      0 *:58861                 *:*                     LISTEN
+tcp        0      0 *:sunrpc                *:*                     LISTEN
+tcp        0      0 *:http                  *:*                     LISTEN
+tcp        0      0 *:mountd                *:*                     LISTEN
+tcp        0      0 ::1%6455456:domain      *:*                     LISTEN
+tcp        0      0 *:ssh                   *:*                     LISTEN
+</pre>
+<dl>
+  <dt>telnet</dt>
+  <dd>指定したTCPポートに接続する。</dd>
+</dl>
+<p class="hatena">
+元々は端末をリモートで操作するためのコマンドであるが、tcpを使った通信にならなんでも使える。</p>
+<pre class="verbatim-soft">
+$ telnet 127.0.0.1 80
+Trying 127.0.0.1...
+Connected to 127.0.0.1.
+Escape character is '^]'.
+GET /
+<!DOCTYPE html>
+(略)
+</pre>
+<dl>
+  <dt>chkconfig</dt>
+  <dd>デーモンの自動起動設定</dd>
+</dl>
+<pre class="verbatim-soft">
+$ sudo chkconfig nginx on
+</pre>
+<ul class="list2">
+<ul class="list2">
+  <li>listオプションをつけるとデーモンの一覧を見ることができる</li>
+</ul>
+</ul>
+<h3><a name="i7">8.dovecotを適切に設定</a></h3>
+<p class="hatena">
+dovecotはインストールされている。smtpの回で入れたのであまり細かい記憶は残っていない。</p>
+<p class="hatena">
+/etc/dovecot/dovecot.confを編集する。</p>
+<pre class="verbatim-soft">
+$ sudo nano /etc/dovecot/dovecot.conf
+protocols = imap pop3
+(略)
+mail_location = maildir:~/Maildir
+(略)
+$ sudo nano /etc/dovecot/conf.d/10-ssl.conf
+(略)
+ssl = yes
+ssl_cert = /usr/share/ssl2/server.pem
+ssl_key = /usr/share/ssl2/server.key
+(略)
+</pre>
+<p class="hatena">
+dovecotを再起動して設定は完了する。</p>
+<h3><a name="i8">9./etc/hosts.allowと/etc/hosts.denyの書式</a></h3>
+<pre class="verbatim-soft">
+(デーモン名):(ipアドレス/ホスト)
+</pre>
+<h3><a name="i9">10./etc/hosts.allowと/etc/hosts.denyの設定</a></h3>
+<p class="hatena">
+(来週の課題で提出します)</p>
+<h3><a name="i10">11.禁止したアクセスのログ</a></h3>
+<p class="hatena">
+(来週の課題で提出します)</p>
+<h3><a name="i11">12./etc/rc.d/以下の仕組み</a></h3>
+<p class="hatena">
+まずいちばん最初に、/etc/rc.d/rcが実行される。</p>
+<p class="hatena">
+このrcは今のランレベルに合わせて、/etc/rc(ランレベル).d/以下にあるファイルをそれぞれ実行して、Sから始まるファイル名のデーモンを起動する。</p>
+<p class="hatena">
+Kから始まるファイル名のデーモンは無視される。</p>
+<p class="hatena">
+rc(ランレベル).d以下に有るのは/etc/init.d/へのリンクである。</p>
+<h3><a name="i12">13.支障のないデーモンを全て止める。</a></h3>
+<p class="hatena">
+bluetoothの接続を行うデーモンと、プリンタサーバを止める。</p>
+<pre class="verbatim-soft">
+$ sudo service bluetooth stop
+Stopping bluetoothd:                                            [  OK  ]
+$ sudo service cups stop
+cupsを停止中:                                                   [  OK  ]
+$ sudo chkconfig bluetooth off
+$ sudo chkconfig cups off
+</pre>
+
+<hr>
+<div class="footer">
+Generated by <a href="http://www2u.biglobe.ne.jp/~MAS/soft.html#htwiki">ひとりWiki</a> version 2.5.0
+</div>
+</body>
+</html>

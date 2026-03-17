@@ -1,0 +1,306 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>第十四回レポート</title>
+<link rel="stylesheet" href="css/watery-blue/wiki.css" type="text/css">
+</head>
+<body>
+<h1>第十四回レポート</h1>
+<p class="hatena">
+課題をTorに設定した。</p>
+<h3><a name="i0">1.Torとは?</a></h3>
+<p class="hatena">
+TorとはThe Onion Routerの略であり、匿名性の高い通信を行う仕組みである。</p>
+<h3><a name="i1">2.Torが秘匿性の高い通信を行える仕組み</a></h3>
+<p class="hatena">
+TorネットワークにはOnionRouter・DirectoryServer・DirectoryAuthorityServerが存在する。</p>
+<p class="hatena">
+情報を送る側はまず最初にDirectoryサーバからOnionRouterの一覧をダウンロードする。</p>
+<p class="hatena">
+一覧から適当にルータを選び、データを辿らせる適当な順序を決める。</p>
+<p class="hatena">
+データを経路の逆順に、それぞれのルータに対応した鍵で暗号化する。</p>
+<p class="hatena">
+データの送り手が送信するときには、データ自体は多重に暗号化された状態にある。この状態がまるで玉ねぎの皮のようであることからOnionRouterと呼ばれている。</p>
+<p class="hatena">
+送信されたデータを受け取ったルータは、自分の鍵で暗号化された部分を複合し、次のルータへ送る。(玉ねぎの皮を剥いでいく)</p>
+<p class="hatena">
+それぞれのルータは自分が誰から送られ、誰に送るのかしかわからないため、データの出処を探るには全てのルータに当たる必要がある。</p>
+<p class="hatena">
+これは現実的ではないため、実質的に秘匿性が高くなっている。</p>
+<h3><a name="i2">3.Torのビルド・インストール</a></h3>
+<p class="hatena">
+ここでは、公式サイトからソースをダウンロードしてビルドした。</p>
+<pre class="verbatim-soft">
+$ wget <a href="https://www.torproject.org/dist/tor-0.2.6.10.tar.gz">https://www.torproject.org/dist/tor-0.2.6.10.tar.gz</a>
+$ tar -xzf tor-0.2.6.10.tar.gz
+$ cd tor-0.2.6.10
+$ sudo ./configure
+</pre>
+<p class="hatena">
+このままの状態だとライブラリ"libevent"が見つからない旨のエラーが起きるので、apt-getでインストールする必要がある。</p>
+<pre class="verbatim-soft">
+checking for libevent directory... configure: WARNING: Could not find a linkable libevent. If you have it installed somewhere unusual, you can > specify an explicit path using --with-libevent-dir 
+</pre>
+<p class="hatena">
+libeventだけでなくlibevent-develも必要らしい。</p>
+<pre class="verbatim-soft">
+$ sudo apt-get install libevent-devel
+</pre>
+<pre class="verbatim-soft">
+$ sudo ./configure --prefix=/
+$ sudo make
+$ sudo make install
+$ cd ~/tor
+</pre>
+<p class="hatena">
+インストールは完了した。torコマンドで起動する。</p>
+<pre class="verbatim-soft">
+$ tor
+Jul 24 17:35:01.032 [notice] Tor v0.2.6.10 (git-58c51dc6087b0936) running on Linux with Libevent 2.0.10-stable, OpenSSL 1.0.1p and Zlib 1.2.5.
+Jul 24 17:35:01.032 [notice] Tor can't help you if you use it wrong! Learn how to be safe at <a href="https://www.torproject.org/download/download#warning">https://www.torproject.org/download/download#warning</a>
+Jul 24 17:35:01.032 [notice] Configuration file "/etc/tor/torrc" not present, using reasonable defaults.
+Jul 24 17:35:01.034 [notice] Opening Socks listener on 127.0.0.1:9050
+Jul 24 17:35:01.000 [notice] Parsing GEOIP IPv4 file /share/tor/geoip.
+Jul 24 17:35:01.000 [notice] Parsing GEOIP IPv6 file /share/tor/geoip6.
+Jul 24 17:35:01.000 [notice] We were built to run on a 64-bit CPU, with OpenSSL 1.0.1 or later, but with a version of OpenSSL that apparently lacks accelerated support for the NIST P-224 and P-256 groups. Building openssl with such support (using the enable-ec_nistp_64_gcc_128 option when configuring it) would make ECDH much faster.
+Jul 24 17:35:01.000 [notice] Bootstrapped 0%: Starting
+Jul 24 17:35:02.000 [notice] Bootstrapped 5%: Connecting to directory server
+Jul 24 17:35:02.000 [notice] Bootstrapped 10%: Finishing handshake with directory server
+Jul 24 17:35:03.000 [notice] Bootstrapped 15%: Establishing an encrypted directory connection
+Jul 24 17:35:03.000 [notice] Bootstrapped 20%: Asking for networkstatus consensus
+Jul 24 17:35:04.000 [notice] Bootstrapped 25%: Loading networkstatus consensus
+Jul 24 17:35:07.000 [notice] I learned some more directory information, but not enough to build a circuit: We have no usable consensus.
+Jul 24 17:35:07.000 [notice] Bootstrapped 40%: Loading authority key certs
+Jul 24 17:35:08.000 [notice] Bootstrapped 45%: Asking for relay descriptors
+Jul 24 17:35:08.000 [notice] I learned some more directory information, but not enough to build a circuit: We need more microdescriptors: we have 0/6429, and can only build 0% of likely paths. (We have 0% of guards bw, 0% of midpoint bw, and 0% of exit bw = 0% of path bw.)
+Jul 24 17:35:10.000 [notice] Bootstrapped 50%: Loading relay descriptors
+Jul 24 17:35:13.000 [notice] Bootstrapped 57%: Loading relay descriptors
+Jul 24 17:35:13.000 [notice] Bootstrapped 66%: Loading relay descriptors
+Jul 24 17:35:13.000 [notice] Bootstrapped 72%: Loading relay descriptors
+Jul 24 17:35:14.000 [notice] Bootstrapped 80%: Connecting to the Tor network
+Jul 24 17:35:14.000 [notice] Bootstrapped 90%: Establishing a Tor circuit
+Jul 24 17:35:16.000 [notice] Tor has successfully opened a circuit. Looks like client functionality is working.
+Jul 24 17:35:16.000 [notice] Bootstrapped 100%: Done
+</pre>
+<p class="hatena">
+この状態でプロキシ設定に"127.0.0.1:9050"を指定すればTorを介した通信ができる。</p>
+<h3><a name="i3">4.コマンドの解説</a></h3>
+<dl>
+  <dt>tor</dt>
+  <dd>torに接続するためのプログラム</dd>
+</dl>
+<table>
+<tr>
+  <td>-f</td>
+  <td>設定ファイルの場所を指定する。</td>
+</tr>
+<tr>
+  <td>--hash-password</td>
+  <td>コントロールポートに接続するためのパスワードを設定する。</td>
+</tr>
+<tr>
+  <td>--verify-config</td>
+  <td>設定ファイルの記述にミスがないか確認する。</td>
+</tr>
+</table>
+<dl>
+  <dt>tor-resolve</dt>
+  <dd>Torを介して名前解決を行うプログラム</dd>
+</dl>
+<table>
+<tr>
+  <td>-x</td>
+  <td>逆引きする。</td>
+</tr>
+<tr>
+  <td>-v</td>
+  <td>詳細にログを表示する。</td>
+</tr>
+<tr>
+  <td>-5</td>
+  <td>SOCKS5プロトコルを利用して通信する。何も指定しないとこれで名前解決しようとする。</td>
+</tr>
+<tr>
+  <td>-4</td>
+  <td>SOCKS4aプロトコルを利用して通信する。逆引きができない。</td>
+</tr>
+<tr>
+  <td>-p</td>
+  <td>ポートを指定する。デフォルトでは9050を使う。</td>
+</tr>
+</table>
+<pre class="verbatim-soft">
+$ tor-resolve www.elec.e.yamagata-u.ac.jp
+133.24.255.82
+</pre>
+<h3><a name="i4">5.Torを適切に設定する</a></h3>
+<p class="hatena">
+まずはじめに設定例のファイルをコピーする。</p>
+<pre class="verbatim-soft">
+$ sudo cp /etc/tor/torrc.sample /etc/tor/torrc
+</pre>
+<table>
+<tr>
+  <td>Socksport (ポート)</td>
+  <td>TorがListenするポートを指定する。アドレス:ポートのようにも指定できる。</td>
+</tr>
+<tr>
+  <td>SocksPolicy (IP帯)</td>
+  <td>Torに接続してもいいIPアドレス帯を設定できる。上に書かれている設定が優先される。</td>
+</tr>
+<tr>
+  <td>Log (ログのレベル) (出力先)</td>
+  <td>ログを出力する先を設定する。</td>
+</tr>
+<tr>
+  <td>RunAsDaemon (1or0)</td>
+  <td>1の場合、バックで動くような動作になる。</td>
+</tr>
+<tr>
+  <td>DataDirectory (ディレクトリ)</td>
+  <td>様々なデータを保存する場所を指定する。デフォルトでは~/.torにある。</td>
+</tr>
+<tr>
+  <td>ControlPort (ポート)</td>
+  <td>コントロールポートを指定する。</td>
+</tr>
+<tr>
+  <td>HashedControlPassword (ハッシュ化されたパスワード)</td>
+  <td>コントロールポートに入るためのパスワードを指定する。</td>
+</tr>
+<tr>
+  <td>HiddenServiceDir (ディレクトリ)</td>
+  <td>HiddenServiceの設定ファイルをおく場所を指定する。</td>
+</tr>
+<tr>
+  <td>HiddenServicePort (ポート) (IPアドレス:ポート)</td>
+  <td>HiddenServiceを動かすポートを指定する</td>
+</tr>
+<tr>
+  <td>ORPort (ポート)</td>
+  <td>リレーを受ける場合に使うポートを指定する。NATを超えるために443などがよく使われている?</td>
+</tr>
+<tr>
+  <td>Nickname (名前)</td>
+  <td>リレーサーバにつける名前</td>
+</tr>
+<tr>
+  <td>ContactInfo</td>
+  <td>リレーサーバの所有者のメールアドレス</td>
+</tr>
+<tr>
+  <td>Address</td>
+  <td>リレー時に使うIPアドレスorドメイン名を指定する</td>
+</tr>
+<tr>
+  <td>DirPort</td>
+  <td>ディレクトリサーバとして使う時に、どのポートをListenするか指定する。</td>
+</tr>
+<tr>
+  <td>DirPortFrontPage</td>
+  <td>このノードが、TorのディレクトリサーバであるとISPなどに知らせるHTMLファイルのファイルパスを指定する。DirPortで公開される</td>
+</tr>
+<tr>
+  <td>ExitPolicy</td>
+  <td>Exitノードとして動かすとき、接続できる通信先を限定する。すべてrejectすればExitノードとして動かなくなる。</td>
+</tr>
+</table>
+<p class="hatena">
+Logの出力先をsyslogにして、RunAsDaemonの値を1にした。</p>
+<p class="hatena">
+他の設定は特に変えない。(中継ノードとして働かないように)</p>
+<h3><a name="i5">6.起動時に自動起動させる</a></h3>
+<p class="hatena">
+/etc/tor/torrcの"RunAsDaemon"のコメントアウトを外す。</p>
+<pre class="verbatim-soft">
+RunAsDaemon 1
+</pre>
+<p class="hatena">
+今回のTorは自分でビルドしたのでinit.d以下にデーモンの管理をするファイルが存在しない。</p>
+<p class="hatena">
+そこでapache2のものを参考にして作り、serviceコマンドからの操作できるようにする。</p>
+<p class="hatena">
+chkconfigにtorを追加し、自動起動させる。</p>
+<pre class="verbatim-soft">
+$ sudo chkconfig --add tor
+$ sudo chkconfig tor on
+</pre>
+<h3><a name="i6">7.コントロールポートとは?</a></h3>
+<p class="hatena">
+コントロールポートとは、torの現在の状態を表示するために開放するポートである。</p>
+<p class="hatena">
+パスワード認証が使えるが、暗号化はされていないため外部から接続すべきでない。</p>
+<p class="hatena">
+telnetを利用して接続する。</p>
+<h3><a name="i7">8.コントロールポートを操作する</a></h3>
+<p class="hatena">
+torrcのControlPort欄のコメントアウトを外しておく。</p>
+<p class="hatena">
+パスワードの設定をする。torコマンドの--hash-passwordオプションを利用する。</p>
+<pre class="verbatim-soft">
+$ tor --hash-password (パスワード)
+Jul 28 14:19:12.092 [notice] Tor v0.2.6.10 (git-58c51dc6087b0936) running on Linux with Libevent 2.0.10-stable, OpenSSL 1.0.1p and Zlib 1.2.5.
+Jul 28 14:19:12.092 [notice] Tor can't help you if you use it wrong! Learn how to be safe at <a href="https://www.torproject.org/download/download#warning">https://www.torproject.org/download/download#warning</a>
+16:(略)
+</pre>
+<p class="hatena">
+表示された最後の行をtorrcのHashedControlPasswordの値として貼り付けておき、torを再起動する。</p>
+<p class="hatena">
+telnetで接続する。</p>
+<pre class="verbatim-soft">
+$ telnet localhost 9051
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+Authenticate (パスワード)	//入力する
+250 OK
+</pre>
+<p class="hatena">
+ここまで表示されればコントロールポートを操作できるようになる。</p>
+<p class="hatena">
+使えるコマンドはたくさんあり、ここで全て解説することはできない。(いくつかのコマンドはここで詳細を見ることができる。<a href="http://www51.atwiki.jp/torealy/pages/27.html">http://www51.atwiki.jp/torealy/pages/27.html</a>)</p>
+<p class="hatena">
+ここではコンフィグファイルの内容を確認するコマンドを実行する。</p>
+<pre class="verbatim-soft">
+getinfo config-text	//これを入力
+250+config-text=
+ControlPort 9051
+DataDirectory //var/tor
+HashedControlPassword 16:(略)
+Log notice syslog
+RunAsDaemon 1
+.
+250 OK
+</pre>
+<h3><a name="i8">9.HiddenServiceとは?</a></h3>
+<p class="hatena">
+HiddenServiceとは、torの仕組みを利用して匿名でサーバを立てる仕組みである。</p>
+<h3><a name="i9">10.実際にHiddenServiceを立ち上げる</a></h3>
+<p class="hatena">
+torrcを書き換える。</p>
+<pre class="verbatim-soft">
+HiddenServerDir /var/tor/hs
+HiddenServicePort 80 127.0.0.1:80
+</pre>
+<pre class="verbatim-soft">
+$ sudo mkdir /var/tor/hs
+$ sudo chmod 0700 /var/tor/hs
+$ sudo service tor restart
+</pre>
+<p class="hatena">
+これで/var/tor/hs/hostnameが生成され、外部からアクセスできるようになった。</p>
+<pre class="verbatim-soft">
+$ sudo cat /var/tor/hs/hostname
+fl5niq4yczezl4mp.onion
+</pre>
+<p class="hatena">
+torを介さなくても良い場合は、<a href="http://fl5niq4yczezl4mp.onion.to/">http://fl5niq4yczezl4mp.onion.to/</a> から中身を見ることもできる。</p>
+
+<hr>
+<div class="footer">
+Generated by <a href="http://www2u.biglobe.ne.jp/~MAS/soft.html#htwiki">ひとりWiki</a> version 2.5.0
+</div>
+</body>
+</html>

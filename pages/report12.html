@@ -1,0 +1,514 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>第十二回レポート</title>
+<link rel="stylesheet" href="css/watery-blue/wiki.css" type="text/css">
+</head>
+<body>
+<h1>第十二回レポート</h1>
+<h3><a name="i0">1.IP,TCP,UDP,ICMPとは? TCPとUDPの使い分け</a></h3>
+<dl>
+  <dt>IP</dt>
+  <dd>IPとはInternetProtocolの略であり、ネットワークでパケットをやり取りするために使われているプロトコルである。</dd>
+</dl>
+<p class="hatena">
+IPで通信しているコンピュータはIPアドレスを持ち、送られてきたパケットが自分のものであれば受け入れ、そうでなければ破棄する。</p>
+<dl>
+  <dt>TCP</dt>
+  <dd>TCPとはTransmissionControlProtocolの略であり、IPの上で信頼性のある通信をするためのプロトコルである。</dd>
+</dl>
+<p class="hatena">
+TCPは送られてきたパケットが正しいものであるのかを確認し、再送を要求する機能を持っているので、情報の欠損のない通信をすることができる。</p>
+<p class="hatena">
+しかしその信頼性ゆえにDoSなどの脆弱性を受けやすくなっている。</p>
+<dl>
+  <dt>UDP</dt>
+  <dd>UDPはUserDatagramProtocolの略である。TCPのような信頼性は無いが、早く情報を伝えることのできるプロトコルである。</dd>
+</dl>
+<p class="hatena">
+UDPにはTCPの持つ、データ欠損を再送要求し補完する機能がないため、信頼性のある通信を行うことはできない。</p>
+<p class="hatena">
+パケットの内部にはデータが正しいものであるのかを確認するためのチェックサムが存在しているが、そこで検出されたデータ欠損はただ破棄されるだけである。</p>
+<p class="hatena">
+またTCPにある、送信者と受信者の相互の通信を行わないため、IPアドレスの詐称に弱い。</p>
+<p class="hatena">
+そのためUDPを利用したプロトコルであるDNSは中間者攻撃に弱くなっている。</p>
+<p class="hatena">
+また、同一ネットワーク内のホストにブロードキャスト通信(全てのホストに送信)が出来る。</p>
+<dl>
+  <dt>ICMP</dt>
+  <dd>ICMPはInternetControlMessageProtocolの略である。接続状況の通知に使われるプロトコルである。</dd>
+</dl>
+<p class="hatena">
+エコー要求/応答の機能や、通信が宛先まで辿り着かなかったことなどの通知を行う機能などを持つ。</p>
+<p class="hatena">
+ICMPヘッダにはタイプ(そのデータが何を意味するものか)を示す部分、コード(タイプで意味したものが、今どのような状況か)を示す部分が存在する。</p>
+<p class="hatena">
+エコー通知はpingコマンドで使われている。</p>
+<ul class="list1">
+  <li>TCPとUDPの使い分け</li>
+</ul>
+<p class="hatena">
+TCPはその信頼性を生かしてHTTPなど情報の正確さが重要である通信で使われる。</p>
+<p class="hatena">
+一方UDPは情報のリアルタイム性が重要である動画配信や音声通信などに利用される。</p>
+<h3><a name="i1">2.TCPのフラグ,ICMPの種類と役割</a></h3>
+<ul class="list1">
+  <li>TCPのフラグ</li>
+</ul>
+<table>
+<tr>
+  <td>URG</td>
+  <td>データの中に緊急データが含まれていることを示す。あまり使われていない。</td>
+</tr>
+<tr>
+  <td>ACK</td>
+  <td>ヘッダに有効なACK番号が含まれていることを示す。ACK番号とはTCPプロトコルでの情報の正確さを確認するための番号である。受信側はシーケンス番号(TCPパケットに付けられる通し番号)に、受信したデータのサイズを足したものをACK番号として送信する。これによって、データがどれだけ正確に届いたかを知ることが出来る。</td>
+</tr>
+<tr>
+  <td>PSH</td>
+  <td>データをキャッシュせず速やかにアプリケーションに渡すよう要求するためのフラグ</td>
+</tr>
+<tr>
+  <td>RST</td>
+  <td>TCPでの接続を拒否/中断したいときに使われるフラグ</td>
+</tr>
+<tr>
+  <td>SYN</td>
+  <td>TCP接続する場合、一番最初に送られるパケットでonになっているフラグ。</td>
+</tr>
+<tr>
+  <td>FIN</td>
+  <td>通信が終わったことを示すフラグ。送受信側両方がFINを送信するとTCP接続は終了する。</td>
+</tr>
+</table>
+<ul class="list1">
+  <li>ICMPの種類と役割</li>
+</ul>
+<table>
+<tr>
+  <td>タイプ</td>
+  <td>名前</td>
+  <td>役割</td>
+</tr>
+<tr>
+  <td>0</td>
+  <td>Echo Reply Message(エコー応答通知)</td>
+  <td>受け取ったエコー応答要求の送信元と送信先を入れ替え、タイプを0にしたものが送信される。pingコマンドで使う。</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td>Destination Unreachable Message(宛先到達不可能通知)</td>
+  <td>送信先のホストに送れない場合の通知。コードにはその理由を示す数字が代入されている。</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td>Source Quench Message(送出抑制要求通知)</td>
+  <td>受信能力を超えた通信であったと通知するもの。</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td>Redirect Message(経路変更要求通知)</td>
+  <td>別のゲートウェイを利用するように要求するもの。受け取ったホストは自身のルーティングテーブルを書き換え、そこに送信するようにする。</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td>Echo Message(エコー要求通知)</td>
+  <td>送信先のノードにエコーを要求する。pingコマンドで使われている。</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td>Router Advertisement Message(ルーター広告通知)</td>
+  <td>ルータ(≒デフォルトゲートウェイ)のIPアドレスを通知する。優先度と一緒にルータのIPアドレスが入っている。</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td>Router Solicitation Message(ルーター請願通知)</td>
+  <td>ルータにルータ広告を送信するよう要求するもの。</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td>Time Exceeded Message(時間切れ通知)</td>
+  <td>IPヘッダのTTL(Time To Live,経由してよいノードの数)が切れても宛先ホストに到達できなかったことを示す。tracerouteコマンドで使われている。</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td>Parameter Problem Message(不正引数通知)</td>
+  <td>問題のあるデータを破棄したことを示す。データにはIPヘッダと問題のあった箇所を示す数字が記入されている。</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td>Timestamp Message(タイムスタンプ要求通知)</td>
+  <td>2つのホスト間の通信にかかる時間を計測するためのもの。0時から経過した秒数をミリ秒込で送信する。</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td>Timestamp Reply Message(タイムスタンプ応答通知)</td>
+  <td>↑の要求に応答するもの。現在時刻を記入して返答する。</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td>Information Request Message(情報要求通知)</td>
+  <td>IPヘッダを0(ブロードキャスト通信する意)にして送信する。昔はネットワークに存在するホストの数を計測するために使われていた。今ではネットワークに存在しないIPアドレスをあぶり出す為に使われている。</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>Information Reply Message(情報応答通知)</td>
+  <td>↑に返答するもの。</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td>Address Mask Request Message(アドレスマスク要求通知)</td>
+  <td>アドレスマスク(おそらくサブネットマスクを意味する?)の送信を要求するもの。</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td>Address Mask Reply Message(アドレスマスク応答通知)</td>
+  <td>↑に返答するもの。</td>
+</tr>
+</table>
+<h3><a name="i2">3.パケットとは?</a></h3>
+<p class="hatena">
+パケットとは、情報を細かく分割したものである。情報を細かく分割することによって、データの一部分だけを送りやすくなる(データ欠損があった場合に、該当部分だけを再送しやすい)。また、大きなデータをそのまま送ってしまうと回線がそれだけで埋まってしまい、他のノード同士の通信が不可能になってしまうが、パケットであれば幾つものデータを混在させて通信することができるため、ネットワークでの通信に向いている。</p>
+<h3><a name="i3">4.パケットフィルタとは?</a></h3>
+<p class="hatena">
+パケットフィルタとは、送られてきたデータを確認し、指定した条件に一致したパケットのみ通過させ、他のものを破棄するというものである(指定した条件のみ破棄するということもできる。)。</p>
+<p class="hatena">
+必要のないデータを破棄することで、余計な攻撃を受け付けないようにすることができる。不必要な危険性を回避するために、パケットフィルタは必要だと言える。</p>
+<h3><a name="i4">5.コマンド使用方法</a></h3>
+<dl>
+  <dt>iptables</dt>
+  <dd>パケットフィルタを設定するコマンド。</dd>
+</dl>
+<p class="hatena">
+基本的には</p>
+<pre class="verbatim-soft">
+$ sudo iptables (ルールを追加する・削除するなどの指定) (チェイン名) (オプションたくさん)
+$ sudo iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT
+</pre>
+<p class="hatena">
+のような形式で実行できる。</p>
+<table>
+<tr>
+  <td>-A</td>
+  <td>チェインの最後にルールを追加する。</td>
+</tr>
+<tr>
+  <td>-D</td>
+  <td>チェインからルールを削除する。</td>
+</tr>
+<tr>
+  <td>-L</td>
+  <td>チェインのルールを一覧表示する。</td>
+</tr>
+<tr>
+  <td>-F</td>
+  <td>チェインのルールを全て削除する。</td>
+</tr>
+<tr>
+  <td>-X</td>
+  <td>チェインを削除する。</td>
+</tr>
+</table>
+<p class="hatena">
+チェインとは、いくつかのルールをまとめたものである。まとめることで管理がしやすくなる。</p>
+<p class="hatena">
+そして、チェイン名の後に指定できるオプションは以下のとおり。</p>
+<table>
+<tr>
+  <td>-p</td>
+  <td>プロトコルの指定</td>
+</tr>
+<tr>
+  <td>-j</td>
+  <td>パケットをどこに送るかの指定。自分で作ったチェインに送るか、ACCEPT(受け入れる)DROP(破棄する)REJECT(拒絶する)LOG(ログに出力)などを指定できる。</td>
+</tr>
+<tr>
+  <td>-m</td>
+  <td>使えるオプションを増やすオプション。オプションの後にモジュール名を記入する。詳しくは6番で</td>
+</tr>
+</table>
+<dl>
+  <dt>iptables-save</dt>
+  <dd>iptablesで有効になっているパケットフィルタの状態を標準出力に出力するコマンド。</dd>
+  <dt>iptables-restore</dt>
+  <dd>パケットフィルタの状態をファイルから読み出すコマンド。</dd>
+</dl>
+<p class="hatena">
+ip6tables,ip6tables-save,ip6tables-restoreは、iptablesの対象がIPv6になるのみでコマンドの使い方はほとんど変っていないため省く。</p>
+<h3><a name="i5">6.iptablesのモジュールの使用方法</a></h3>
+<dl>
+  <dt>icmp</dt>
+  <dd></dd>
+</dl>
+<p class="hatena">
+"--icmp-type"が使えるようになる。icmpのタイプの数値を指定したり、anyで全てのタイプを設定できる。</p>
+<dl>
+  <dt>tcp</dt>
+  <dd></dd>
+</dl>
+<table>
+<tr>
+  <td>--sport,--source-port</td>
+  <td>データの送信元ポートの指定</td>
+</tr>
+<tr>
+  <td>--dport,--destination-port</td>
+  <td>データの送信先ポートの指定</td>
+</tr>
+<tr>
+  <td>--tcp-flags</td>
+  <td>TCPヘッダのフラグの指定</td>
+</tr>
+</table>
+<dl>
+  <dt>udp</dt>
+  <dd></dd>
+</dl>
+<p class="hatena">
+tcpと同じ意味を持つ"--source-port"と"--destination-port"が使える</p>
+<dl>
+  <dt>state</dt>
+  <dd></dd>
+</dl>
+<p class="hatena">
+接続状態を指定できるモジュール。"--state"オプションが使え、以下のような接続状態が指定できる。</p>
+<table>
+<tr>
+  <td>INVALID</td>
+  <td>既知の状態でない</td>
+</tr>
+<tr>
+  <td>ESTABLISHED</td>
+  <td>接続が確立した時</td>
+</tr>
+<tr>
+  <td>NEW</td>
+  <td>新しい接続の開始時</td>
+</tr>
+<tr>
+  <td>RELATED</td>
+  <td>接続確立後</td>
+</tr>
+</table>
+<dl>
+  <dt>recent</dt>
+  <dd></dd>
+</dl>
+<p class="hatena">
+ものすごい勢いで接続してくるクライアントを指定できる。</p>
+<table>
+<tr>
+  <td>--name</td>
+  <td>名前の指定</td>
+</tr>
+<tr>
+  <td>--set</td>
+  <td>アドレスをリストに追加する。</td>
+</tr>
+<tr>
+  <td>--remove</td>
+  <td>リストからアドレスを削除する。</td>
+</tr>
+<tr>
+  <td>--rcheck</td>
+  <td>リストにIPアドレスが入っているのかのチェックができる。</td>
+</tr>
+<tr>
+  <td>--seconds</td>
+  <td>アドレスがリストにあり、指定した秒数以内である場合にマッチする。</td>
+</tr>
+<tr>
+  <td>--hitcount</td>
+  <td>アドレスがリストにあり、指定した回数以上である場合にマッチする。</td>
+</tr>
+</table>
+<h3><a name="i6">7.パブリックIPv4アドレスとは? プライベートIPv4アドレスとは?</a></h3>
+<p class="hatena">
+パブリックIPv4アドレスとは、プライベートIPv4アドレスでなく、また全世界でひとつしか存在しないIPv4アドレスのことである。</p>
+<p class="hatena">
+プライベートIPv4アドレスとは、LAN内で利用できることになっているIPv4アドレスのことである。</p>
+<p class="hatena">
+同じLANに属するコンピュータでしか接続することができない。</p>
+<p class="hatena">
+3つ種類があり、LAN内に存在するコンピュータの数によって使い分ける。</p>
+<table>
+<tr>
+  <td>クラスA</td>
+  <td>10.0.0.0/8</td>
+</tr>
+<tr>
+  <td>クラスB</td>
+  <td>172.16.0.0/12</td>
+</tr>
+<tr>
+  <td>クラスC</td>
+  <td>192.168.0.0/16</td>
+</tr>
+</table>
+<h3><a name="i7">8.パケットフィルタの貫通パケット</a></h3>
+<table>
+<tr>
+  <td>パケット</td>
+  <td>理由</td>
+</tr>
+<tr>
+  <td>tcp/106</td>
+  <td>squidで利用している</td>
+</tr>
+<tr>
+  <td>tcp/123</td>
+  <td>ntpdで利用している</td>
+</tr>
+<tr>
+  <td>tcp/21</td>
+  <td>ftpで利用している</td>
+</tr>
+<tr>
+  <td>tcp/22</td>
+  <td>sshdで利用している</td>
+</tr>
+<tr>
+  <td>tcp/25</td>
+  <td>postfixで利用している</td>
+</tr>
+<tr>
+  <td>tcp/443</td>
+  <td>dovecotで利用している</td>
+</tr>
+<tr>
+  <td>tcp/465</td>
+  <td>smtps(postfix)で利用している</td>
+</tr>
+<tr>
+  <td>tcp/80</td>
+  <td>apache2で利用している</td>
+</tr>
+<tr>
+  <td>tcp/81</td>
+  <td>nginxで利用している</td>
+</tr>
+<tr>
+  <td>tcp/993</td>
+  <td>imaps(dovecot)で利用している</td>
+</tr>
+<tr>
+  <td>udp/123</td>
+  <td>ntpdで利用している</td>
+</tr>
+<tr>
+  <td>udp/53</td>
+  <td>bindで利用している</td>
+</tr>
+<tr>
+  <td>echo-reply</td>
+  <td>エコーのリプライに使う</td>
+</tr>
+<tr>
+  <td>destination-unreachable</td>
+  <td>ホスト到達不可時の通知を受け取るため</td>
+</tr>
+<tr>
+  <td>source-quench</td>
+  <td>送出抑制要求通知を受け取るため</td>
+</tr>
+<tr>
+  <td>redirect</td>
+  <td>経路変更要求通知を受け取るため</td>
+</tr>
+<tr>
+  <td>time-exceeded</td>
+  <td>タイムスタンプ応答通知を受け取るため</td>
+</tr>
+<tr>
+  <td>parameter-problem</td>
+  <td>不正引数通知を受け取るため</td>
+</tr>
+</table>
+<h3><a name="i8">9.そのルールをiptablesとip6tablesの書式で書く</a></h3>
+<pre class="verbatim-soft">
+ -A INPUT -i lo -j ACCEPT
+ -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+ -A INPUT -m state --state NEW -m tcp -p tcp --dport 106 -j ACCEPT
+ -A INPUT -m state --state NEW -m tcp -p tcp --dport 123 -j ACCEPT
+ -A INPUT -m state --state NEW -m tcp -p tcp --dport 21 -j ACCEPT
+ -A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
+ -A INPUT -m state --state NEW -m tcp -p tcp --dport 25 -j ACCEPT
+ -A INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
+ -A INPUT -m state --state NEW -m tcp -p tcp --dport 465 -j ACCEPT
+ -A INPUT -m state --state NEW -m tcp -p tcp --dport 80 -j ACCEPT
+ -A INPUT -m state --state NEW -m tcp -p tcp --dport 81 -j ACCEPT
+ -A INPUT -m state --state NEW -m tcp -p tcp --dport 993 -j ACCEPT
+ -A INPUT -m state --state NEW -m udp -p udp --dport 123 -j ACCEPT
+ -A INPUT -m state --state NEW -m udp -p udp --dport 53 -j ACCEPT
+ -A INPUT -p icmp --icmp-type echo-reply -j ACCEPT
+ -A INPUT -p icmp --icmp-type destination-unreachable -j ACCEPT
+ -A INPUT -p icmp --icmp-type source-quench -j ACCEPT
+ -A INPUT -p icmp --icmp-type redirect -j ACCEPT
+ -A INPUT -p icmp --icmp-type time-exceeded -j ACCEPT
+ -A INPUT -p icmp --icmp-type parameter-problem -j ACCEPT
+ -A INPUT -p icmp --icmp-type any -j DROP
+</pre>
+<p class="hatena">
+ip6tablesの場合は"--icmp-type"を"--icmp6-type"に、"icmp"を"ipv6-icmp"にする必要がある。</p>
+<h3><a name="i9">10.ログの記録</a></h3>
+<p class="hatena">
+( <a href="http://wokowa.net/blog/archives/63">http://wokowa.net/blog/archives/63</a> )を参考にiptablesの設定ファイルを書く。</p>
+<pre class="verbatim-soft">
+ -A RH-Firewall-1-INPUT -d 255.255.255.255 -j DROP	//ブロードキャストアドレスのログ出力を無効にする
+ -A RH-Firewall-1-INPUT -d 224.0.0.1 -j DROP			//マルチキャストアドレスのログ出力を無効にする
+ -A RH-Firewall-1-INPUT -p udp -m multiport --dport 137,138,139,445 -j DROP
+ -A RH-Firewall-1-INPUT -p udp --dport 17500 -j DROP
+ -A RH-Firewall-1-INPUT -m limit --limit 1/s -j LOG --log-prefix "[iptables BLOCKED] : " --log-level=info
+</pre>
+<p class="hatena">
+ip6tablesの設定も同様にする。</p>
+<pre class="verbatim-soft">
+ -A RH-Firewall-1-INPUT -d FF01::101 -j DROP
+ -A RH-Firewall-1-INPUT -p udp -m multiport --dport 137,138,139,445 -j DROP
+ -A RH-Firewall-1-INPUT -p udp --dport 17500 -j DROP
+ -A RH-Firewall-1-INPUT -m limit --limit 1/s -j LOG --log-prefix "[ip6tables BLOCKED] : " --log-level=info
+</pre>
+<p class="hatena">
+これで/var/log/messagesにログが出力されるようになった。</p>
+<h3><a name="i10">11.起動時に自動的にパケットフィルタを有効にする</a></h3>
+<p class="hatena">
+元から有効になっていた。</p>
+<pre class="verbatim-soft">
+$ chkconfig | grep iptables
+iptables        0:off   1:off   2:on    3:on    4:on    5:on    6:off
+</pre>
+<h3><a name="i11">12.世界から送られてきた不正パケットとそれを送信した理由の推測</a></h3>
+<p class="hatena">
+(Pending... 来週提出します。)</p>
+<h3><a name="i12">13.過去に報告された深刻なセキュリティホール</a></h3>
+<table>
+<tr>
+  <td>ShellShock</td>
+  <td>環境変数に代入してあるコマンドが、Bashを動かした後勝手に実行されてしまうセキュリティホール</td>
+</tr>
+<tr>
+  <td>HeartBleed</td>
+  <td>HeartBeatの送信ごとに、少しずつメモリの内容が送信されてしまうセキュリティホール</td>
+</tr>
+<tr>
+  <td>POOBLE</td>
+  <td>暗号文の内容を解読されてしまうという、SSL3.0の仕様に起因するセキュリティホール</td>
+</tr>
+</table>
+<h3><a name="i13">14.セキュリティホールの情報を素早く知る方法</a></h3>
+<p class="hatena">
+SlashdotやJPNICなどの技術系サイトを購読しておくことなどがあるだろう。</p>
+<h3><a name="i14">15.セキュリティホールへの対処</a></h3>
+<p class="hatena">
+既にセキュリティホールを直したプログラムが提供されている場合は、それをアップデートする。</p>
+<p class="hatena">
+無ければ攻撃を受けないよう対処した上でプログラムのアップデートを待つ。</p>
+
+<hr>
+<div class="footer">
+Generated by <a href="http://www2u.biglobe.ne.jp/~MAS/soft.html#htwiki">ひとりWiki</a> version 2.5.0
+</div>
+</body>
+</html>

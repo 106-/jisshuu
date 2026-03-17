@@ -1,0 +1,329 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>第五回レポート</title>
+<link rel="stylesheet" href="css/watery-blue/wiki.css" type="text/css">
+</head>
+<body>
+<h1>第五回レポート</h1>
+<h3><a name="i0">1.WWWとは何か。その歴史と意義を述べよ。</a></h3>
+<p class="hatena">
+WWWとは、主にhtmlで書かれたページ間でリンクを張り、互いにリンクし合ったページ群で出来上がった蜘蛛の巣のようなネットワークのことを指す。</p>
+<p class="hatena">
+wwwは様々なページの場所の表記をを可能にするURI、ページを構成しそれぞれのページをURIでつなげるHTML、ページの送受信を行うHTTPで成り立っている。</p>
+<p class="hatena">
+wwwの利点は、html中のリンクを開くことで関連の有るページを開ける点にある。</p>
+<p class="hatena">
+wwwの歴史は、Tim Berners-Leeが1980年台に個人的なプログラムとして作っていたENQUIREに遡る。</p>
+<p class="hatena">
+その後、Timは1989年3月にCERNでENQUIREを発展させたシステムの構想の論文を書いた。</p>
+<p class="hatena">
+1990年11月13日からCERNでwwwの実装が始まった。</p>
+<p class="hatena">
+1991年8月6日にTimは世界初のwebページを公開した。</p>
+<p class="hatena">
+(世界で最初に作られたhtmlページを再現したもの: <a href="http://info.cern.ch/hypertext/WWW/TheProject.html">http://info.cern.ch/hypertext/WWW/TheProject.html</a>)</p>
+<p class="hatena">
+1993年4月30日にwwwページがCERNから開放され、誰にでも利用できるようになった。</p>
+<h3><a name="i1">2.html、http、httpsとは何か。</a></h3>
+<dl>
+  <dt>html</dt>
+  <dd>htmlとはHyperText Markup Languageの略である。</dd>
+</dl>
+<p class="hatena">
+htmlとは、文字を修飾して表示するために作られたテキストファイルである。</p>
+<p class="hatena">
+htmlファイルはタグとそれを囲む文字列で構成されている。</p>
+<p class="hatena">
+ユーザはwebサイトにアクセスし、htmlファイルをダウンロードした後、それぞれのブラウザでhtmlファイルを元に画面を作る。</p>
+<dl>
+  <dt>http</dt>
+  <dd>httpとはHypertext Transfer Protocolの略である。</dd>
+</dl>
+<p class="hatena">
+主にはファイルの送信に使われている、tcpの上のレイヤに位置するプロトコルである。</p>
+<p class="hatena">
+例えばgoogleのトップページにアクセスした場合、以下のような通信が行われている。</p>
+<pre class="verbatim-soft">
+(送信したもの)
+GET / HTTP/1.1
+Host: www.google.co.jp
+Connection: keep-alive
+(略)
+(受信したもの)
+HTTP/1.1 302 Found
+Location: <a href="https://www.google.co.jp/?gws_rd=ssl">https://www.google.co.jp/?gws_rd=ssl</a>
+Cache-Control: private
+(略)
+</pre>
+<p class="hatena">
+それぞれの一行目をステータスライン、それ以下をレスポンス/リクエストヘッダ、ここには無いがレスポンス/リクエストヘッダの下にレスポンス/リクエストボディがある。</p>
+<p class="hatena">
+受信側のステータスラインにある三桁の数字は、リクエストがどうなったかの状況(成功・ファイルが見つからない・アクセス許可がないなど)を表している。</p>
+<dl>
+  <dt>https</dt>
+  <dd>httpsとはHypertext Transfer Protocol Secureの略である。</dd>
+</dl>
+<p class="hatena">
+httpに暗号化などの機能を足したものであり、盗聴されたくないデータのやり取りや、サイトのなりすましをしていない証拠に使われている。</p>
+<h3><a name="i2">3.httpサーバプログラムには幾つもの種類がある。列挙してそれぞれの特徴を述べよ。</a></h3>
+<p class="hatena">
+Nginx,IIS,GoAhead WebServerの特徴を述べる。</p>
+<dl>
+  <dt>Nginx</dt>
+  <dd></dd>
+</dl>
+<p class="hatena">
+動作が軽量なwebサーバーであり、apacheのようにモジュールを加えることで機能を追加していくことができる。</p>
+<p class="hatena">
+リバースプロキシやキャッシュなどの機能にも対応している。</p>
+<dl>
+  <dt>IIS</dt>
+  <dd></dd>
+</dl>
+<p class="hatena">
+Windows上で動くwebサーバ。設定をGUI上で行うため、コマンドプロンプトに慣れていないユーザでもwebサーバの管理ができる。</p>
+<p class="hatena">
+http以外にもftpやsmtp等の機能が付いている。</p>
+<dl>
+  <dt>GoAhead WebServer</dt>
+  <dd></dd>
+</dl>
+<p class="hatena">
+組込み機器向けのwebサーバ。メモリをあまり使わない。</p>
+<h3><a name="i3">4.他のhttpサーバと比較してApacheの特徴を述べよ。</a></h3>
+<p class="hatena">
+Apacheはwebサーバとして利用される機会が高く、設定ファイルの書き方などの日本語ドキュメントが充実しているのが特徴である。</p>
+<p class="hatena">
+また、ユーザは自由にモジュールを追加することができ、機能を拡張できる。</p>
+<h3><a name="i4">5.画像入りWWWページを作成・公開</a></h3>
+<p class="hatena">
+htmlファイルを/var/www/html以下に作成した。</p>
+<p class="hatena">
+webサイトのデザインにはフリーで公開されているbootstrapを使った。</p>
+<h3><a name="i5">6.関係する次のファイルの書式と意味を説明せよ。</a></h3>
+<dl>
+  <dt>/etc/apache2/conf/httpd.conf</dt>
+  <dd></dd>
+</dl>
+<p class="hatena">
+行頭に「#」をつけるとその行はコメントアウトされ、apacheから無視される。</p>
+<p class="hatena">
+基本的には</p>
+<pre class="verbatim-soft">
+(設定するもの) (その値)	//(設定するもの):「ディレクティブ」と呼ぶらしい
+</pre>
+<p class="hatena">
+のような形式で記入していく。</p>
+<p class="hatena">
+以下よく使いそうなコマンドのみ載せる。</p>
+<p class="hatena">
+(<a href="http://httpd.apache.org/docs/2.2/ja/mod/core.html">http://httpd.apache.org/docs/2.2/ja/mod/core.html</a>を参照した。)</p>
+<table>
+<tr>
+  <td>Listen</td>
+  <td>apacheが使うポートを設定する。</td>
+</tr>
+<tr>
+  <td>LoadModule</td>
+  <td>使うモジュールの名前とパスを設定する。</td>
+</tr>
+<tr>
+  <td>User,Group</td>
+  <td>apacheが使うユーザ名とグループ。このユーザ/グループから読めないファイルにアクセスした時には403エラーが帰ってくる。</td>
+</tr>
+<tr>
+  <td>ServerAdmin</td>
+  <td>エラーページに表示される管理者の名前</td>
+</tr>
+<tr>
+  <td>DocumentRoot</td>
+  <td>どのディレクトリにhtmlファイルなどを設置するか指定する。</td>
+</tr>
+<tr>
+  <td>Options</td>
+  <td>様々な設定を加える。IndexesやExecCGIなどを複数指定することができる。</td>
+</tr>
+<tr>
+  <td>AllowOverride</td>
+  <td>.htaccessファイルで上書きできる設定を指定する。</td>
+</tr>
+<tr>
+  <td>&lt;Directory (pass)&gt;</td>
+  <td>指定したディレクトリのみに適用する設定を記入する。</td>
+</tr>
+<tr>
+  <td>&lt;VirtualHost (host)&gt;</td>
+  <td>指定したホストのみに適用する設定を記入する。</td>
+</tr>
+<tr>
+  <td>&lt;FilesMatch (re)&gt;</td>
+  <td>指定した正規表現に対応するファイルにのみ適用する設定を記入する。</td>
+</tr>
+</table>
+<dl>
+  <dt>/var/log/apache2/access_log</dt>
+  <dd></dd>
+</dl>
+<pre class="verbatim-soft">
+(ホスト名) (識別子) (認証ユーザ名) (時刻) "(リクエストの最初の行)" (ステータスコード) (送信されたバイト数) "(リファラ)" "(ユーザエージェント)"
+</pre>
+<p class="hatena">
+ベーシック認証などでログインしたユーザの場合、(認証ユーザ名)にユーザ名が入る。</p>
+<h3><a name="i6">7.refererとは何か。refererが作られた目的は何か。refererにはどのようなセキュリティ上の問題があるか。</a></h3>
+<p class="hatena">
+リファラとはhttpのリクエストヘッダにある値の一つである。リファラのおかげでサーバ側はユーザがどのページからリンクされてきたのかがわかるようになっている。</p>
+<p class="hatena">
+リファラは上記のような統計用途の利用以外にも、画像への直リンクを禁止するなどサイト内のコンテンツを守るためにも利用されている。</p>
+<p class="hatena">
+しかし、リンク元のURLがわかってしまうというその仕様上、URLのクエリ部分(?以下のもの)がアクセスしたサーバのログに記録されてしまうため危険である。</p>
+<h3><a name="i7">8.agentとは何か。</a></h3>
+<p class="hatena">
+agentもまたhttpのリクエストヘッダにある値の一つである。</p>
+<p class="hatena">
+現在あるブラウザには様々な種類がある。それぞれのブラウザによってhtmlから画面を作る過程は違い、差異が存在する(対応している機能としていない機能など)。その場合、サーバはこのUser-Agentヘッダからユーザがどのブラウザを利用しているかを判断し、適切なページを返している。</p>
+<p class="hatena">
+どのブラウザのユーザエージェントにもMozilla(NetScapeやFirefoxを開発した団体の名前)が付くのは、さまざまなブラウザが出始めたころにほかのブラウザがNetScapeのUser-Agentを真似していたのを今も戻すことができていない為である。</p>
+<h3><a name="i8">9.refererとagentはどこに記録されるか。</a></h3>
+<p class="hatena">
+/var/log/apache2/access_logに保存されている。</p>
+<h3><a name="i9">10.Linuxを起動した時にApacheが自動的に稼働するようにせよ。</a></h3>
+<p class="hatena">
+chkconfigを利用する。</p>
+<pre class="verbatim-soft">
+$ sudo chkconfig apache2 on
+</pre>
+<h3><a name="i10">11./etc/apache2/conf/にある設定ファイルを変更し、適切かつ好みの設定にせよ。</a></h3>
+<p class="hatena">
+以下のように設定した。</p>
+<pre class="verbatim-soft">
+ServerName 133.24.255.82
+&lt;VirtualHost *:80&gt;
+ ServerAdmin 106@jisshuu2
+ DocumentRoot /var/www/html/
+ &lt;Directory /&gt;
+  Options FollowSymLinks
+  AllowOverride None
+ &lt;/Directory&gt;
+ &lt;Directory /var/www/&gt;
+  Options FollowSymLinks MultiViews
+  AllowOverride All
+  Order allow,deny
+  allow from all
+ &lt;/Directory&gt;
+ WSGIScriptAlias /futaba /var/www/bottle/test.wsgi
+ &lt;Directory /var/www/bottle&gt;
+  Order allow,deny
+  allow from all
+ &lt;/Directory&gt;
+ Alias /pma /var/www/phpMyAdmin/
+ &lt;Directory /var/www/phpMyAdmin/&gt;
+  AuthUserFile /var/www/phpMyAdmin/.htpasswd
+  AuthName "What are you seeing?"
+  AuthType Basic
+  require valid-user
+ &lt;/Directory&gt;
+&lt;/VirtualHost&gt;
+</pre>
+<h3><a name="i11">12.自分で作成したページを、https（443/tcp）でも公開せよ。</a></h3>
+<p class="hatena">
+mod_ssl,OpenSSLは既にインストールされていた。</p>
+<p class="hatena">
+本来は信頼されている認証機関から署名された証明書を使うのが望ましいのだが、ここでは自前で発行した証明書を使う。</p>
+<p class="hatena">
+まずは秘密鍵(*.keyのファイル)を生成する。</p>
+<p class="hatena">
+(<a href="http://vine.1-max.net/apache2-ssl.htmlを参考にした。">http://vine.1-max.net/apache2-ssl.htmlを参考にした。</a>)</p>
+<pre class="verbatim-soft">
+# openssl genrsa -des3 1024 > server.key
+Generating RSA private key, 1024 bit long modulus
+........++++++
+.......++++++
+e is 65537 (0x10001)
+Enter pass phrase:(パスワードを入力)
+Verifying - Enter pass phrase:(もう一度パスワードを入力)
+</pre>
+<p class="hatena">
+.keyファイルからパスワードを削除する。これをしないと起動時にパスワードが必要になってしまい、起動時に詰まってしまう。</p>
+<pre class="verbatim-soft">
+# openssl rsa -in server.key -out server.key
+Enter pass phrase for server.key:
+writing RSA key
+</pre>
+<p class="hatena">
+証明書署名要求(*.csrのファイル)を生成する。</p>
+<pre class="verbatim-soft">
+# openssl req -new -key server.key -out server.csr
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+<br>
+Country Name (2 letter code) [AU]:JP(国名)
+State or Province Name (full name) [Some-State]:YAMAGATA(都道府県名)
+Locality Name (eg, city) []:YAMAGATA(市町村名)
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:YAMAGATA Univ.(会社の名前とか)
+Organizational Unit Name (eg, section) []:Linux Jisshuu(所属)
+Common Name (e.g. server FQDN or YOUR name) []:jisshuu2.elec.e.yamagata-u.ac.jp(サーバのホスト名 ここを間違えるとブラウザに怒られてしまう。)
+Email Address []:106@jisshuu2.elec.e.yamagata-u.ac.jp(メールアドレス)
+Please enter the following 'extra' attributes
+to be sent with your certificate request
+A challenge password []:
+An optional company name []:　(二行とも空白のままでEnter)
+</pre>
+<p class="hatena">
+証明書(*.crt)を発行する。</p>
+<pre class="verbatim-soft">
+# openssl x509 -in server.csr -out server.crt -req -signkey server.key -days 365
+Signature ok
+subject=/C=JP/ST=YAMAGATA/L=YAMAGATA/O=YAMAGATA Univ./<br>OU=Linux Jisshuu/CN=jisshuu2.elec.e.yamagata-u.ac.jp/emailAddress=106@jisshuu2.elec.e.yamagata-u.ac.jp
+Getting Private key
+</pre>
+<p class="hatena">
+実際のWebサーバーでは、秘密鍵と証明書署名要求を自分で作り、証明書署名要求のみを認証局に提出する。認証局は証明書署名要求に署名し、証明書として返す。こうすることで、自分で作成した鍵(秘密鍵・公開鍵の両方)が署名されたことになる。</p>
+<p class="hatena">
+続いてapache2の設定をする。</p>
+<pre class="verbatim-soft">
+# nano /etc/apache2/conf.d/ssl.conf
+</pre>
+<pre class="verbatim-soft">
+&lt;VirtualHost _default_:443&gt;
+#  General setup for the virtual host
+DocumentRoot "/var/www/ssl"
+ServerName 133.24.255.82:443
+ServerAdmin 106@jisshuu2.elec.e.yamagata-u.ac.jp
+ErrorLog logs/ssl_error_log
+TransferLog logs/ssl_access_log
+ &lt;Directory /var/www/ssl&gt;
+  AllowOverride All
+  Options ExecCGI
+  Order allow,deny
+  allow from all
+ &lt;/Directory&gt;
+(略)
+SSLCertificateFile /etc/apache2/conf/ssl.crt/server.crt
+(略)
+SSLCertificateKeyFile /etc/apache2/conf/ssl.key/server.key
+</pre>
+<p class="hatena">
+apache2を再起動する。</p>
+<pre class="verbatim-soft">
+$ sudo apache2ctl restart
+</pre>
+<p class="hatena">
+tcpの443ポートを開放する。VineLinuxにはiptableの設定をしてくれるファイアウォールが入っているので、その設定を行う。</p>
+<pre class="verbatim-soft">
+$ sudo system-config-securitylevel-tui
+</pre>
+<p class="hatena">
+あとは画面の通りに設定すれば無事にhttpsでの接続ができるようになる。</p>
+
+<hr>
+<div class="footer">
+Generated by <a href="http://www2u.biglobe.ne.jp/~MAS/soft.html#htwiki">ひとりWiki</a> version 2.5.0
+</div>
+</body>
+</html>

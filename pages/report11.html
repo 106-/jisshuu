@@ -1,0 +1,545 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>第十一回レポート</title>
+<link rel="stylesheet" href="css/watery-blue/wiki.css" type="text/css">
+</head>
+<body>
+<h1>第十一回レポート</h1>
+<h3><a name="i0">1.initとは?</a></h3>
+<p class="hatena">
+initとは、linuxを起動した時最初に立ち上がるプログラムである。そのためPIDは1である。</p>
+<p class="hatena">
+initはシステムを/etc/inittabに書かれているランレベルに変更する。</p>
+<h3><a name="i1">2.grubとは?</a></h3>
+<p class="hatena">
+grubとはlinuxがインストールされているコンピュータの電源ボタンを押した時、一番最初に起動するブートローダである。</p>
+<p class="hatena">
+HDDのMBRにあるgrubが/bootを呼び出し、OSの切り替え画面を表示させる。</p>
+<p class="hatena">
+設定ファイルは/boot/grub/menu.lstに存在する。</p>
+<p class="hatena">
+電源ボタンを押すと自動的にGRUBが立ち上がる。そのまま放置していると選択されているOSが起動される。(猶予時間はmenu.lstのtimeoutの値で設定できる。)</p>
+<p class="hatena">
+"e"を押すと選択されているOSを起動するためのコマンドを変更できる。</p>
+<p class="hatena">
+"a"を押すとカーネルを起動するときの引数を変えることができる。</p>
+<p class="hatena">
+"c"を押すとシェルに似たものが表示され、コマンドを実行することができる。(使えるコマンドはTabキーで表示できる。)</p>
+<p class="hatena">
+ランレベルを変更する場合は、aを押した後に表示されるコマンドの一番最後にランレベルを指定する。</p>
+<h3><a name="i2">3./etc/fstab、/etc/mtabの役割と書式</a></h3>
+<dl>
+  <dt>/etc/fstab</dt>
+  <dd>起動時にマウントするディスクの一覧</dd>
+</dl>
+<pre class="verbatim-soft">
+$ cat /etc/fstab 
+/dev/VolGroup00/LogVol00 /                       ext4    defaults        1 1
+LABEL=/boot             /boot                   ext4    defaults        1 2
+none                    /dev/pts                devpts  gid=5,mode=620  0 0
+none                    /dev/shm                tmpfs   defaults        0 0
+none                    /proc                   proc    defaults        0 0
+none                    /sys                    sysfs   defaults        0 0
+/dev/VolGroup00/LogVol01 swap                    swap    defaults        0 0
+</pre>
+<p class="hatena">
+書式は</p>
+<pre class="verbatim-soft">
+(デバイス) (マウントする場所) (ファイルシステム) (マウントするときのオプション) (ファイルシステムをdumpするかどうか) (起動時にfsckする順番)
+</pre>
+<p class="hatena">
+dumpとはドライブをバックアップするコマンドである。</p>
+<p class="hatena">
+6列目の数字を0にすればfsckされない。</p>
+<dl>
+  <dt>/etc/mtab</dt>
+  <dd>マウントされているドライブの一覧を表示する。</dd>
+</dl>
+<pre class="verbatim-soft">
+$ cat /etc/mtab 
+rootfs / rootfs rw 0 0
+/dev/root / ext4 rw,relatime,data=ordered 0 0
+/dev /dev tmpfs rw,relatime,mode=755 0 0
+/proc /proc proc rw,relatime 0 0
+/sys /sys sysfs rw,relatime 0 0
+/proc/bus/usb /proc/bus/usb usbfs rw,relatime 0 0
+/dev/sda1 /boot ext4 rw,relatime,data=ordered 0 0
+none /dev/pts devpts rw,relatime,gid=5,mode=620,ptmxmode=000 0 0
+none /dev/shm tmpfs rw,relatime 0 0
+sunrpc /var/lib/nfs/rpc_pipefs rpc_pipefs rw,relatime 0 0
+/etc/auto.misc /misc autofs rw,relatime,fd=6,pgrp=1885,timeout=300,minproto=5,maxproto=5,indirect 0 0
+　-hosts /net autofs rw,relatime,fd=12,pgrp=1885,timeout=300,minproto=5,maxproto=5,indirect 0 0
+nfsd /proc/fs/nfsd nfsd rw,relatime 0 0
+gvfs-fuse-daemon /home/106/.gvfs fuse.gvfs-fuse-daemon rw,nosuid,nodev,relatime,user_id=500,group_id=500 0 0
+</pre>
+<p class="hatena">
+書式はfstabと同じである。</p>
+<h3><a name="i3">4.upstartの仕組み,/etc/init/*の役割・書式</a></h3>
+<p class="hatena">
+upstartとはinitと同様にデーモンを起動するデーモンであるが、upstartはイベント(起動した、デバイスが脱着された,Ctrl+Alt+Delが押されたなどの)に対応してデーモンを起動するという点で異なっている。設定ファイルはVineLinuxの場合/etc/init/*.confである。</p>
+<pre class="verbatim-soft">
+$ cat /etc/init/control-alt-delete.conf 
+# control-alt-delete - emergency keypress handling
+#
+# This task is run whenever the Control-Alt-Delete key combination is
+# pressed.  Usually used to shut down the machine.
+start on control-alt-delete
+exec /sbin/shutdown -r now "Control-Alt-Delete pressed"
+</pre>
+<p class="hatena">
+書式は以下の通り</p>
+<table>
+<tr>
+  <td>start on</td>
+  <td>どのタイミングで実行するのかの指定。startup(起動時),control-alt-delete,runlevelなどを指定する。</td>
+</tr>
+<tr>
+  <td>exec</td>
+  <td>コマンドを実行する</td>
+</tr>
+<tr>
+  <td>respawn</td>
+  <td>繰り返して起動する</td>
+</tr>
+<tr>
+  <td>stop on</td>
+  <td>止めるタイミングを指定する。start onの引数と同じものを指定する。</td>
+</tr>
+<tr>
+  <td>script,end script</td>
+  <td>シェルのスクリプトを記述できる。</td>
+</tr>
+</table>
+<p class="hatena">
+動作の状況は"initctl list"で確認できる。</p>
+<h3><a name="i4">5./etc/sysconfig/以下の各ファイルの役割</a></h3>
+<p class="hatena">
+/etc/sysconfig/にはシステムの設定ファイルが存在している。</p>
+<p class="hatena">
+デーモンの起動オプションを置いているものや、コンフィグファイルの場所を指定しているものが多い。</p>
+<table>
+<tr>
+  <td>acpid</td>
+  <td>電源管理関連の設定</td>
+</tr>
+<tr>
+  <td>atd*</td>
+  <td>atコマンドに関連するファイル?実行権限を持っている</td>
+</tr>
+<tr>
+  <td>authconfig</td>
+  <td>authconfigの設定</td>
+</tr>
+<tr>
+  <td>autofs</td>
+  <td>authfs(必要とされた時だけドライブをマウントするプログラム)の設定</td>
+</tr>
+<tr>
+  <td>cbq/</td>
+  <td>ポートごとに帯域制限をするための設定ファイルがある</td>
+</tr>
+<tr>
+  <td>clock</td>
+  <td>タイムゾーンなどを設定する</td>
+</tr>
+<tr>
+  <td>console/</td>
+  <td>端末の設定ができる。</td>
+</tr>
+<tr>
+  <td>crontab</td>
+  <td>crontabの設定</td>
+</tr>
+<tr>
+  <td>desktop</td>
+  <td>起動するデスクトップマネージャを指定する。</td>
+</tr>
+<tr>
+  <td>dhcpd</td>
+  <td>dhcpdのコマンドオプションを指定する。</td>
+</tr>
+<tr>
+  <td>dhcrelay</td>
+  <td>dhcrelay(dhcpのプロトコルでの通信を中継するプログラム)の設定</td>
+</tr>
+<tr>
+  <td>dovecot</td>
+  <td>dovecotののオプションを指定できる。</td>
+</tr>
+<tr>
+  <td>gpm</td>
+  <td>gpm(コンソール上でマウスを使ってコピーペーストできるようにするプログラム)の設定</td>
+</tr>
+<tr>
+  <td>grub</td>
+  <td>grubの設定をする</td>
+</tr>
+<tr>
+  <td>harddisks</td>
+  <td>ハードディスクの詳細な動作設定</td>
+</tr>
+<tr>
+  <td>i18n*</td>
+  <td>使用する文字コードや言語が設定されているスクリプト</td>
+</tr>
+<tr>
+  <td>ime</td>
+  <td>imeの切り替え等に使うファイル</td>
+</tr>
+<tr>
+  <td>init</td>
+  <td>ブート時の文字の表示色などを変えられるファイル</td>
+</tr>
+<tr>
+  <td>installinfo</td>
+  <td>インストール時の情報があるファイル</td>
+</tr>
+<tr>
+  <td>ip6tables</td>
+  <td>iptablesのipv6の方の設定をする。</td>
+</tr>
+<tr>
+  <td>iptables</td>
+  <td>linuxに標準で入っているファイアウォールの設定をする。</td>
+</tr>
+<tr>
+  <td>iptables-config</td>
+  <td>iptablesの起動時のオプションなどの設定をしているファイル</td>
+</tr>
+<tr>
+  <td>irqbalance*</td>
+  <td>IRQ(割り込み処理)についての設定</td>
+</tr>
+<tr>
+  <td>kernel</td>
+  <td>カーネルの設定をするファイル</td>
+</tr>
+<tr>
+  <td>keyboard</td>
+  <td>使っているキーボードの設定があるファイル</td>
+</tr>
+<tr>
+  <td>lirc</td>
+  <td>linuxで赤外線通信をするためのプログラムの設定らしい</td>
+</tr>
+<tr>
+  <td>man-db</td>
+  <td>manのページを検索したり表示したりといったことに使われているプログラムの設定</td>
+</tr>
+<tr>
+  <td>modules/</td>
+  <td>起動時に読み込むモジュールの設定</td>
+</tr>
+<tr>
+  <td>named</td>
+  <td>namedの設定に使う。ルートフォルダの設定が行える</td>
+</tr>
+<tr>
+  <td>netconsole</td>
+  <td>netconsole(コンソールのログをネットワークに送信するプログラム)の設定。転送先を指定する。</td>
+</tr>
+<tr>
+  <td>network</td>
+  <td>ネットワークの設定。ホスト名やゲートウェイなどが設定されている。</td>
+</tr>
+<tr>
+  <td>network-scripts/</td>
+  <td>ネットワーク系の設定をするファイルがある。network-scriptsフォルダ内の設定ファイルはデーモンnetworkの設定に使う</td>
+</tr>
+<tr>
+  <td>networking/</td>
+  <td>NetWorkManagerの旧型版が使っていたファイルが残っているらしいフォルダ</td>
+</tr>
+<tr>
+  <td>nfs</td>
+  <td>nfsで使うポートの固定化などができるファイル</td>
+</tr>
+<tr>
+  <td>nginx</td>
+  <td>nginxの設定ファイル。設定ファイルの場所が指定されている。</td>
+</tr>
+<tr>
+  <td>ntpd</td>
+  <td>ntpdの設定ファイル。起動時オプションが設定できる。</td>
+</tr>
+<tr>
+  <td>quota_nld</td>
+  <td>quota(ディスクの利用料制限をするプログラム)で利用超過をD-Busに通知するデーモン</td>
+</tr>
+<tr>
+  <td>rdisc</td>
+  <td>コンピュータをルータとして利用するときに、経路管理をするためのプログラムの設定</td>
+</tr>
+<tr>
+  <td>rhn/</td>
+  <td>RHN(RedHatNetwork、パッケージのアップデート等に使える)の設定</td>
+</tr>
+<tr>
+  <td>rsyslog</td>
+  <td>rsyslogの設定を行う。</td>
+</tr>
+<tr>
+  <td>samba</td>
+  <td>sambaサーバー(ファイル共有やプリンタサーバとして働く)の設定</td>
+</tr>
+<tr>
+  <td>saslauthd</td>
+  <td>saslauthd(認証に使うプログラム)の設定</td>
+</tr>
+<tr>
+  <td>snmpd</td>
+  <td>snmpd(ネットワーク上のデバイスを監視するためのプログラム)の設定</td>
+</tr>
+<tr>
+  <td>snmptrapd</td>
+  <td>snmpdが送信するものに対してこちらは受信側</td>
+</tr>
+<tr>
+  <td>squid</td>
+  <td>プロキシサーバの設定ファイル</td>
+</tr>
+<tr>
+  <td>sshd*</td>
+  <td>sshの設定ファイル。スクリプトである。</td>
+</tr>
+<tr>
+  <td>system-config-securitylevel</td>
+  <td>VineLinuxのファイアウォールの設定ファイル</td>
+</tr>
+<tr>
+  <td>system-config-users</td>
+  <td>VineLinuxのユーザ管理プログラムの設定ファイル</td>
+</tr>
+<tr>
+  <td>tuxonice</td>
+  <td>tuxonice(ハイバネーションモードを実現するためのプログラム)の設定ファイル</td>
+</tr>
+<tr>
+  <td>udev</td>
+  <td>コンピュータにデバイスが接続されたときに、そのデバイスに対応する/dev以下のファイルを作るプログラムの設定ファイル</td>
+</tr>
+<tr>
+  <td>wpa_supplicant</td>
+  <td>無線LANの設定ファイル</td>
+</tr>
+<tr>
+  <td>xinetd</td>
+  <td>xinetdの設定ファイル</td>
+</tr>
+</table>
+<h3><a name="i5">6.マウントとは?</a></h3>
+<p class="hatena">
+マウントとは、他のファイルシステムをOSのあるファイルシステムにつなげて、アクセスできるようにすることである。</p>
+<h3><a name="i6">7.DVDやUSBメモリを入れると自動的にマウントされる仕組み</a></h3>
+<p class="hatena">
+本来であればautofsの設定をして自動マウントを行う。</p>
+<p class="hatena">
+しかし、GNOMEが起動している状態ではUSBメモリなどのマウントをGNOMEが行っている。</p>
+<p class="hatena">
+自動マウントするか否かの設定はgnome-volume-propertiesで行うことが出来る。</p>
+<h3><a name="i7">8.Linuxで使われているファイルシステム   9.ext2とext3とext4の違い</a></h3>
+<p class="hatena">
+mkfsできるものを説明する。1EBとは10^6TBである。</p>
+<table>
+<tr>
+  <td>名前</td>
+  <td>最大ファイルサイズ</td>
+  <td>最大ボリュームサイズ</td>
+  <td>特徴</td>
+</tr>
+<tr>
+  <td>ext2</td>
+  <td>2TB</td>
+  <td>16TB</td>
+  <td>extを拡張したもの。昔はよく使われていた。ディスクシークが少なくなるように設計されている。fsckが遅い。</td>
+</tr>
+<tr>
+  <td>ext3</td>
+  <td>16GB-2TB</td>
+  <td>2TB-32TB</td>
+  <td>ext2としてもマウントできる。書込している間にfsckできない用になっている。2038年問題に対応していない。</td>
+</tr>
+<tr>
+  <td>ext4</td>
+  <td>16TB</td>
+  <td>1EB</td>
+  <td>現在の主流である。fsckが早くなった。2514年まで使える。</td>
+</tr>
+<tr>
+  <td>cramfs</td>
+  <td>16MB</td>
+  <td>256MB</td>
+  <td>読み込み専用のファイルシステムである。インストールイメージに使われている。</td>
+</tr>
+<tr>
+  <td>msdos</td>
+  <td>2GB</td>
+  <td>4GB</td>
+  <td>FAT16とも呼ばれ、MS-DOSで使われていたもの。ファイル名をあまり長くできない。</td>
+</tr>
+<tr>
+  <td>ntfs</td>
+  <td>16TB</td>
+  <td>256TB</td>
+  <td>Windowsで使われているもの。仕様が公開されていないが、有志の働きによりLinuxでも扱えるようになった。</td>
+</tr>
+<tr>
+  <td>xfs</td>
+  <td>8EB</td>
+  <td>8EB</td>
+  <td>古い歴史を持つ。ファイルの読み書きが早い。削除したファイルは復元できない。小さいファイルが多いと遅くなってしまう。</td>
+</tr>
+<tr>
+  <td>vfat</td>
+  <td>2GB</td>
+  <td>2TB</td>
+  <td>長いファイル名を使えるようにしたFAT</td>
+</tr>
+</table>
+<h3><a name="i8">10.シングルユーザモードとは?</a></h3>
+<p class="hatena">
+シングルユーザモードとは、余計なデーモンを起動してない状態で(ランレベル1で起動するデーモンのみ起動する)rootとしてシェルを使うモードである。</p>
+<p class="hatena">
+サーバ不調の解決や、rootパスワードを忘れたときなどに使う。</p>
+<h3><a name="i9">11.fsckでハードディスクの検査</a></h3>
+<p class="hatena">
+ディスクから起動して、シングルユーザモードで起動できたところから説明する。</p>
+<p class="hatena">
+VineLinuxの入っているドライブは自動的にLVMが設定してるので、fsckするには論理ボリュームをアクティブにしなければならない。</p>
+<pre class="verbatim-soft">
+# lvm lvscan
+  ACTIVE            '/dev/VolGroup00/LogVol00' [70.97 GiB] inherit
+  ACTIVE            '/dev/VolGroup00/LogVol01' [3.31 GiB] inherit
+# lvm lvdisplay
+  --- Logical volume ---
+  LV Name                /dev/VolGroup00/LogVol00
+  VG Name                VolGroup00
+  LV UUID                sGRfAy-0Iqy-36D1-zpyT-2w23-7YXc-dnVoW6
+  LV Write Access        read/write
+  LV Status              available
+  # open                 0
+  LV Size                70.97 GiB
+  Current LE             2271
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:0
+   
+  --- Logical volume ---
+  LV Name                /dev/VolGroup00/LogVol01
+  VG Name                VolGroup00
+  LV UUID                C3Qs7J-GQPg-PjL3-1TzO-UbJl-DR7f-yKpjao
+  LV Write Access        read/write
+  LV Status              available
+  # open                 0
+  LV Size                3.31 GiB
+  Current LE             106
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:1
+</pre>
+<p class="hatena">
+論理ドライブをアクティブにする。</p>
+<pre class="verbatim-soft">
+# lvm vgchange -ay
+  2 logical volume(s) in volume group "VolGroup00" now active
+</pre>
+<p class="hatena">
+fsckコマンドを実行する。</p>
+<pre class="verbatim-soft">
+# fsck -t ext4 -f /dev/VolGroup00/LogVol00
+fsck (busybox 1.18.4, 2011-05-23 20:34:20 JST)
+fsck: can't read '/etc/fstab': No such file or directory
+e2fsck 1.41.14 (22-Ddec-2010)
+Pass 1: Checking inodes, blocks, and sizes
+Pass 2: Checking directory structure
+Pass 3: Checking directory connectivity
+Pass 4: Checking reference counts
+Pass 5: Checking group summary information
+/dev/VolGroup00/LogVol01: 443396/4653056 files (0.2% non-contiguous), 6390839/18604032 blocks
+</pre>
+<p class="hatena">
+ディスクチェックは完了した。</p>
+<h3><a name="i10">12.rwでマウントされているディスクにfsckをかける問題</a></h3>
+<p class="hatena">
+何かのデーモンor誰かがファイルをディスクに書き込んでいる最中にfsckを実行してしまうと、書き込んでいる部分が不正と扱われファイルが破損してしまうため、fsckの実行は書き込み不可の状態で実行すべきである。</p>
+<h3><a name="i11">13./bin/syncの役割は何か。</a></h3>
+<p class="hatena">
+Linuxはファイルをディスクに書き込むとき、逐次書き込んでいくのではなくメモリにバッファとして蓄積しておき、後で書き込んでいく。</p>
+<p class="hatena">
+システムをシャットダウンするときなどには当然このバッファがなく、すべてディスクに書き込まれている状態でなければならない。</p>
+<p class="hatena">
+そこで/bin/syncコマンドを使う。このコマンドはバッファにあるデータを全てディスクに書き込むコマンドである。</p>
+<h3><a name="i12">14.ハードディスクを増設する手順</a></h3>
+<p class="hatena">
+電源を切り、ハードディスクを接続したあとに起動する。</p>
+<p class="hatena">
+最初にハードディスクのデバイスファイルを確認する。fdiskコマンドを利用する。</p>
+<pre class="verbatim-soft">
+$ sudo fdisk -l
+Disk /dev/sda: 80.0 GB, 80026361856 bytes
+ヘッド 255, セクタ 63, シリンダ 9729, 合計 156301488 セクタ
+Units = セクタ数 of 1 * 512 = 512 バイト
+セクタサイズ (論理 / 物理): 512 バイト / 512 バイト
+I/O サイズ (最小 / 推奨): 512 バイト / 512 バイト
+ディスク識別子: 0x000b4f29
+デバイス ブート      始点        終点     ブロック   Id  システム
+/dev/sda1   *          63      417689      208813+  83  Linux
+/dev/sda2          417690   156296384    77939347+  8e  Linux LVM
+Disk /dev/mapper/VolGroup00-LogVol00: 76.2 GB, 76202115072 bytes
+ヘッド 255, セクタ 63, シリンダ 9264, 合計 148832256 セクタ
+Units = セクタ数 of 1 * 512 = 512 バイト
+セクタサイズ (論理 / 物理): 512 バイト / 512 バイト
+I/O サイズ (最小 / 推奨): 512 バイト / 512 バイト
+ディスク識別子: 0x00000000
+ディスク /dev/mapper/VolGroup00-LogVol00 は正常なパーティションテーブルを含んで いません
+ディスク /dev/mapper/VolGroup00-LogVol01: 3556 MB, 3556769792 バイト
+ヘッド 255, セクタ 63, シリンダ 432, 合計 6946816 セクタ
+Units = セクタ数 of 1 * 512 = 512 バイト
+セクタサイズ (論理 / 物理): 512 バイト / 512 バイト
+I/O サイズ (最小 / 推奨): 512 バイト / 512 バイト
+ディスク識別子: 0x00000000
+ディスク /dev/mapper/VolGroup00-LogVol01 は正常なパーティションテーブルを含んで いません
+</pre>
+<p class="hatena">
+ここで、認識されたデバイスが/dev/sdbだとして説明する。</p>
+<p class="hatena">
+次に、ディスクに一つだけパーティションを作りフォーマットする。</p>
+<pre class="verbatim-soft">
+$ sudo fdisk /dev/sdb
+$ sudo mkfs.ext4 /dev/sdb1
+</pre>
+<p class="hatena">
+マウント先のディレクトリを作り、マウントする。</p>
+<pre class="verbatim-soft">
+$ sudo mkdir /mnt/hdd
+$ sudo mount /dev/sdb1 /mnt/hdd
+</pre>
+<p class="hatena">
+/etc/fstabに以下の内容を記述する(システム起動時に自動マウントさせる場合)。</p>
+<pre class="verbatim-soft">
+/dev/sdb1 /mnt/hdd ext4 defaults 0 0
+</pre>
+<h3><a name="i13">15.中身を移し替えてハードディスクを交換する手順</a></h3>
+<p class="hatena">
+中身の移し替えにはddコマンドを利用し、直接新しいハードディスクにコピーする。</p>
+<p class="hatena">
+あるいはディスクイメージを作り、それを復元するという方法もある。</p>
+<p class="hatena">
+ここでは前者の方法を使う。マウントまでは14番の通り。</p>
+<pre class="verbatim-soft">
+// /dev/sdaを/dev/sdb1にコピーする場合。
+$ sudo dd if=/dev/sda of=/dev/sdb
+</pre>
+
+<hr>
+<div class="footer">
+Generated by <a href="http://www2u.biglobe.ne.jp/~MAS/soft.html#htwiki">ひとりWiki</a> version 2.5.0
+</div>
+</body>
+</html>

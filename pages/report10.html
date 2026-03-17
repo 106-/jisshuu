@@ -1,0 +1,299 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>第十回レポート</title>
+<link rel="stylesheet" href="css/watery-blue/wiki.css" type="text/css">
+</head>
+<body>
+<h1>第十回レポート</h1>
+<h3><a name="i0">1.atとは何か。</a></h3>
+<p class="hatena">
+atとは、コマンドを指定した時刻に実行するプログラムである。</p>
+<h3><a name="i1">2.atの使用方法を第4回と同様に詳しく説明せよ。</a></h3>
+<pre class="verbatim-soft">
+$ at "(時刻)" -f "(コマンド)"
+</pre>
+<p class="hatena">
+時刻の指定は以下の形式で行う</p>
+<pre class="verbatim-soft">
+(時):(分) (日).(月).(年)
+</pre>
+<p class="hatena">
+ -lオプションでジョブの確認ができる。</p>
+<pre class="verbatim-soft">
+$ at -l
+3       Sat Jun 20 04:00:00 2015 a 106
+</pre>
+<p class="hatena">
+ -dオプションでジョブを削除する。</p>
+<pre class="verbatim-soft">
+$ at -d (ジョブ番号)	//番号は-lオプションで見る
+</pre>
+<h3><a name="i2">3.cronとは何か。</a></h3>
+<p class="hatena">
+cronとは、コマンドを指定した周期で実行するプログラムである。</p>
+<h3><a name="i3">4.cronの使用方法を第4回と同様に詳しく説明せよ。</a></h3>
+<pre class="verbatim-soft">
+$ crontab -e
+(エディタが立ち上がる。エディタに処理内容を記述していく。立ち上がるエディタは変数EDITORの値によって変わる。)
+</pre>
+<p class="hatena">
+コマンドの記述方法は以下のとおり</p>
+<pre class="verbatim-soft">
+(分) (時) (日) (月) (曜日) (コマンド)
+</pre>
+<p class="hatena">
+"*"は毎を表す。また、"/"を使うと細かく間隔の指定ができるようになる。</p>
+<p class="hatena">
+曜日の欄には日曜=0として、月曜=1、火曜=2といったように指定する。</p>
+<p class="hatena">
+(例)</p>
+<pre class="verbatim-soft">
+ 0 * * * * (コマンド)	//毎時0分にコマンドを実行
+ 0 0 * * * (コマンド)	//毎日0時にコマンドを実行
+ */30 * * * * (コマンド)	//30分ごとにコマンドを実行
+</pre>
+<h3><a name="i4">5.NTPとは?</a></h3>
+<p class="hatena">
+NTPとは、コンピュータの時計を他のコンピュータの時計を参照して同期するためのプロトコルである。</p>
+<p class="hatena">
+階層構造を持ち、上位サーバから正確な時刻を取得することができる。また、通信にかかった時間も考慮して同期している。</p>
+<p class="hatena">
+UDPの123番ポートを利用している。</p>
+<h3><a name="i5">6.ntpd、ntpdateの使用方法</a></h3>
+<dl>
+  <dt>ntpd</dt>
+  <dd>ntpサーバの役割をするデーモン。</dd>
+</dl>
+<p class="hatena">
+設定ファイルは/etc/ntp.confにある。</p>
+<p class="hatena">
+以下の様なオプションをntp.confファイルに書き込んでいく。</p>
+<table>
+<tr>
+  <td>restrict (ホスト名) mask (サブネットマスク) (フラグなど)</td>
+  <td>指定したホストとの通信について設定する。defaultを指定したものが基本設定となり、ホストごとに例外を書いていくことになる。</td>
+</tr>
+<tr>
+  <td>server (ホスト名) minpoll (最小問い合わせ間隔) maxpoll (最大問い合わせ間隔)</td>
+  <td>指定したホストを参照して時刻合わせをする。minpoll・maxpollのそれぞれには2のべき乗の形で記述する。無くても動く。</td>
+</tr>
+<tr>
+  <td>fudge</td>
+  <td>ハードウェアクロッククロックから時刻を調整するためのオプション</td>
+</tr>
+<tr>
+  <td>driftfile</td>
+  <td>自機と問い合わせ先との差を保存するファイルパスを指定する。</td>
+</tr>
+<tr>
+  <td>tinker step (秒数1) panic (秒数2)</td>
+  <td>参考にしているntpサーバとの時刻の差が、秒数1以上であればstepモードで秒数を変更し、秒数2位上であればデーモンを止める。</td>
+</tr>
+</table>
+<p class="hatena">
+以下はrestrictに使うフラグである。</p>
+<table>
+<tr>
+  <td>ignore</td>
+  <td>全て接続を無視する。</td>
+</tr>
+<tr>
+  <td>nomodifty</td>
+  <td>時刻・設定の変更要求を無視する。</td>
+</tr>
+<tr>
+  <td>notrust</td>
+  <td>認証できない場合、通信を無視する。</td>
+</tr>
+<tr>
+  <td>nopeer</td>
+  <td>互いに同期をとらない</td>
+</tr>
+<tr>
+  <td>noquery</td>
+  <td>時刻の問い合わせを無視する。</td>
+</tr>
+<tr>
+  <td>notrap</td>
+  <td>trapサービスのパケットを無視する。trapサービスとは、ネットワークを通じて他のコンピュータを監視するためのものである。</td>
+</tr>
+</table>
+<dl>
+  <dt>ntpdate</dt>
+  <dd>ntpサーバに接続し、時刻合わせを行うコマンド。</dd>
+</dl>
+<table>
+<tr>
+  <td>-q</td>
+  <td>問い合わせのみ行い、設定はしない</td>
+</tr>
+<tr>
+  <td>-b</td>
+  <td>stepモード(いきなり正しい時刻に設定するモード)で時刻を設定する。</td>
+</tr>
+<tr>
+  <td>-B</td>
+  <td>slewモード(ゆっくりと時刻を変更するモード)で時刻を設定する。</td>
+</tr>
+</table>
+<pre class="verbatim-soft">
+$ sudo ntpdate ntp.elec.e.yamagata-u.ac.jp
+</pre>
+<dl>
+  <dt>ntpq</dt>
+  <dd>ntpサーバの現在の設定などを表示するコマンド。</dd>
+</dl>
+<p class="hatena">
+ntp -qで現在同期しているサーバなどの一覧を見ることができる。</p>
+<pre class="verbatim-soft">
+$ ntpq -p
+     remote           refid      st t when poll reach   delay   offset  jitter
+<hr>
+ *ntp-a2.nict.go. .NICT.           1 u   38   64  377   14.550  -28.660  24.932
+</pre>
+<p class="hatena">
+アスタリスクが付いているサーバが現在参照中のサーバである。</p>
+<h3><a name="i6">7./sbin/clockの存在理由と使い方</a></h3>
+<p class="hatena">
+/sbin/clockは/sbin/hwclockにリンクされている。</p>
+<pre class="verbatim-soft">
+lrwxrwxrwx 1 root root 7  4月 24 12:41 /sbin/clock -> hwclock*
+</pre>
+<p class="hatena">
+hwclockはハードウェアクロック(マザーボードが電池で保持している時刻)に触るためのコマンドである。</p>
+<pre class="verbatim-soft">
+$ sudo hwclock --show		//ハードウェアクロックの時刻を見る
+$ sudo hwclock --systohc	//ハードウェアクロックをシステム時刻に合わせる
+$ sudo hwclock --hctosys	//システム時刻をハードウェアクロックに合わせる
+</pre>
+<h3><a name="i7">8.ntp.elec.e.yamagata-u.ac.jp.を参照する設定にする</a></h3>
+<p class="hatena">
+restrictで通信を許可し、serverでホストを指定する。</p>
+<p class="hatena">
+/etc/ntp.confを編集する。</p>
+<pre class="verbatim-soft">
+(略)
+restrict ntp.elec.e.yamagata-u.ac.jp
+server ntp.elec.e.yamagata-u.ac.jp
+</pre>
+<h3><a name="i8">9.午前4時メール</a></h3>
+<p class="hatena">
+次のようなスクリプトを作る。</p>
+<pre class="verbatim-soft">
+$ nano nyan.sh
+echo "朝早いですがおはようございます。2号機です。" | mail -s "おはようございます。" yamamoto@e.yamagata-u.ac.jp
+</pre>
+<p class="hatena">
+パーミッションを変更し、atコマンドで登録する。</p>
+<pre class="verbatim-soft">
+$ sudo chmod 755 nyan.sh 
+$ at "04:00  20.06.15" -f /home/106/nyan.sh
+job 3 at Sat Jun 20 04:00:00 2015
+</pre>
+<h3><a name="i9">10.閏秒とは?</a></h3>
+<p class="hatena">
+閏秒とは、原子時計と実際の天体周期との間にある差を埋めるために挿入される一秒のことである。</p>
+<p class="hatena">
+原子時計は極めて正確に1秒を刻むため、地球の回転とは微妙な差が生じる。その差が0.99秒以下になるように閏秒は挿入されている。</p>
+<h3><a name="i10">11.前回の閏秒でLinuxに発生した問題</a></h3>
+<p class="hatena">
+前回の閏秒では、Linuxカーネルで同じ秒数を二回繰り返すことによって閏秒をやり過ごそうとした(59秒を二回数えた)。それを発端としてMySQLやJavaで障害が発生した。</p>
+<h3><a name="i11">12.閏秒対策</a></h3>
+<p class="hatena">
+tinkerオプションを0にして、常にslewモードで同期するようにする。</p>
+<pre class="verbatim-soft">
+tinker step 0
+</pre>
+<p class="hatena">
+この設定は、/etc/sysconfig/ntpdに-xコマンドをつけることでも変更できる。</p>
+<pre class="verbatim-soft">
+# Drop root to id 'ntp:ntp' by default.  Requires kernel >= 2.2.18.
+OPTIONS="-xp /var/run/ntpd.pid"
+</pre>
+<br>
+<p class="hatena">
+しかし、このバージョンではプログラムのバグによって、SLEWモードが正しく動かないかもしれないとの情報がインターネットにあった。</p>
+<p class="hatena">
+( <a href="http://hiroki.jp/leap-second-2015">http://hiroki.jp/leap-second-2015</a> の情報による。)</p>
+<pre class="verbatim-soft">
+$ apt-cache policy ntp
+ntp:
+  インストール済: 4.2.6p3-6vl6
+  候補: 4.2.6p3-6vl6
+(略)
+</pre>
+<p class="hatena">
+ntp-4.2.8p3-RC1以降のバージョンであればバグは直っているらしいのだが、おそらくインストールされているntpdにはバグがありそうに思えた。</p>
+<p class="hatena">
+よって、ここではntp.orgからダウンロードしたソースコードをコンパイルして差し替える。</p>
+<pre class="verbatim-soft">
+$ cd ~/ダウンロード
+$ wget <a href="http://www.eecis.udel.edu/~ntp/ntp_spool/ntp4/ntp-4.2/ntp-4.2.8p3-RC2.tar.gz">http://www.eecis.udel.edu/~ntp/ntp_spool/ntp4/ntp-4.2/ntp-4.2.8p3-RC2.tar.gz</a>
+$ tar -xvf tar -xvf ntp-4.2.8p3-RC2.tar.gz
+$ cd ntp-4.2.8p3-RC2
+$ mkdir bin
+$ sudo ./configure --prefix=/home/106/ダウンロード/ntp-4.2.8p3-RC2/bin
+$ sudo make
+</pre>
+<p class="hatena">
+しかしここでコンパイルエラーが発生した。</p>
+<pre class="verbatim-soft">
+ntp_loopfilter.c:689: error: ‘MOD_NANO’ undeclared (first use in this function)
+</pre>
+<p class="hatena">
+定数"MOD_NANO"が宣言されていない旨のエラーだ。検索すると、これを"STA_NANO"に置き換えればいいらしい。</p>
+<p class="hatena">
+置き換えてもう一度makeを実行するとコンパイルに通った。</p>
+<pre class="verbatim-soft">
+$ sudo make install
+$ cd ./bin/bin
+$ sudo service ntpd stop
+$ sudo cp ntpd /usr/sbin
+$ sudo service ntpd start
+</pre>
+<p class="hatena">
+/var/log/messagesを見ると、</p>
+<pre class="verbatim-soft">
+Jun 26 01:25:28 jisshuu2 ntpd[11857]: ntpd 4.2.8p3-RC2@1.3265-o Thu Jun 25 16:10:03 UTC 2015 (4): Starting
+</pre>
+<p class="hatena">
+最新版が実行されている。</p>
+<h3><a name="i12">13.閏秒が終了してから状況を分析して報告せよ。</a></h3>
+<p class="hatena">
+(Pending...)</p>
+<h3><a name="i13">14.西暦14292年7月6日は何曜日か。求めた方法も記せ。 </a></h3>
+<p class="hatena">
+dateコマンドに、指定した年月日の曜日を求める事ができるオプションがあるのでそれを利用する。</p>
+<pre class="verbatim-soft">
+$ date -d 142920706
+14292年  7月  6日 水曜日 00:00:00 JST
+</pre>
+<p class="hatena">
+よって、14292年7月6日は水曜日である。</p>
+<p class="hatena">
+また、pythonを利用してツェラーの公式で検算した。</p>
+<p class="hatena">
+( <a href="http://www004.upp.so-net.ne.jp/s_honma/doweek.htm">http://www004.upp.so-net.ne.jp/s_honma/doweek.htm</a> を参考にしました。)</p>
+<pre class="verbatim-soft">
+Python 2.6.6 (r266:84292, Mar  4 2014, 20:48:09)
+[GCC 4.4.5 20101001 (Vine Linux 4.4.5-6.1vl6)] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import math
+>>> g = math.floor
+>>> h = 142
+>>> y = 92
+>>> m = 7
+>>> d = 6
+>>> w = y+g(y/4)+g(h/4)-2*h+g(13*(m+1)/5)+d
+>>> w % 7
+4.0	//水曜日を表す
+</pre>
+
+<hr>
+<div class="footer">
+Generated by <a href="http://www2u.biglobe.ne.jp/~MAS/soft.html#htwiki">ひとりWiki</a> version 2.5.0
+</div>
+</body>
+</html>

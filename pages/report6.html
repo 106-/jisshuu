@@ -1,0 +1,372 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>第六回レポート</title>
+<link rel="stylesheet" href="css/watery-blue/wiki.css" type="text/css">
+</head>
+<body>
+<h1>第六回レポート</h1>
+<h3><a name="i0">1.MTAとは何か。役割と意義を述べよ。</a></h3>
+<p class="hatena">
+MTAとは"Mail/Message Transfer Agent"の略である。</p>
+<p class="hatena">
+MTAは、送られてきたメールが自分宛てのメールであれば、MDA(それぞれのユーザ別にメールを分けるプログラム)に引き渡す。</p>
+<p class="hatena">
+そうでなければ別のMTAへ転送する働きをしている。</p>
+<h3><a name="i1">2.MTAとMUAとMSAの違いを述べよ。</a></h3>
+<p class="hatena">
+MUAは"Mail User Agent"の略であり、ユーザが書いたメールをMTAに送信する役割をする。メーラー/メールソフトと呼ばれているものは主にMUAを指す。OutlookやThunderbirdなどがある。</p>
+<p class="hatena">
+MSAは"Message Submission Agent"の略である。MUAとMTAの間に存在し、不完全なメールの補完、SMTP認証、スパムメール対策などを行っているプログラム。</p>
+<h3><a name="i2">3.sendmail、qmail、postfixその他幾つものMTAがあるが、それぞれの特徴と違いを述べよ。</a></h3>
+<dl>
+  <dt>sendmail</dt>
+  <dd>長い間使われてきている歴史あるMTA</dd>
+</dl>
+<p class="hatena">
+細々とした設定ができるが故に基本的な設定を行うのが難解になったという経歴を持つ。</p>
+<p class="hatena">
+古いMTAであるため、近年の需要(スパムメール対策など)をプラグインとして吸収している。</p>
+<dl>
+  <dt>qmail</dt>
+  <dd>sendmailを顧みて作られたMTA。</dd>
+</dl>
+<p class="hatena">
+メール配送に関わる機能を小分けするなど、脆弱性に強くなるような工夫がされている。</p>
+<p class="hatena">
+その為セキュリティ面では堅牢である。</p>
+<p class="hatena">
+しかしプログラムのライセンス方式が特殊であったため、ディストリビューションに標準で搭載される機会を失った。</p>
+<p class="hatena">
+現在はその問題は改善されているが、すでにpostfixに人気を取られている。</p>
+<dl>
+  <dt>postfix</dt>
+  <dd>qmailを顧みて作られたMTA。</dd>
+</dl>
+<p class="hatena">
+設定ファイルの書き方が簡単であり、サーバ管理者に理解しやすくなっている。</p>
+<p class="hatena">
+qmailを参考にした、機能別にプログラムを分ける工夫がされており、セキュリティが堅牢である上に機能の拡張が容易である。</p>
+<p class="hatena">
+様々なディストリビューションに標準で搭載されている。</p>
+<dl>
+  <dt>radish</dt>
+  <dd>Winsows上で動くSMTP/POP3サーバ</dd>
+</dl>
+<p class="hatena">
+Windows上でGUIで設定できるが、TLSに対応していないなど実際のメールサーバとしては不都合な点がある。</p>
+<p class="hatena">
+SMTPとPOP3サーバの両方が１つのプログラムで扱えるので、設定が簡単である。</p>
+<p class="hatena">
+イントラネットでの運用がメインだろうか。</p>
+<h3><a name="i3">4.postfixを適切に設定せよ。postfixを稼働させ、メールが正しく送受信できることを確かめよ。</a></h3>
+<p class="hatena">
+/etc/postfix/main.cfを編集する。</p>
+<p class="hatena">
+変更/追加した部分のみ載せる。</p>
+<pre class="verbatim-soft">
+myhostname = jisshuu2.elec.e.yamagata-u.ac.jp	//ホスト名を指定。jisshuu2だけで十分かもしれない
+mydomain = jisshuu2.elec.e.yamagata-u.ac.jp
+myorigin = $mydomain
+inet_interfaces = all	//どのSMTPサーバからも受け取れるように設定している
+mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain	//どのメールを自分宛てとして扱うかの設定
+home_mailbox = Maildir/	//メールを保存する場所を指定する。最後の「/」が無ければmailコマンドで読み取れる形式で保存される。
+</pre>
+<h3><a name="i4">5.SMTP認証を利用できるように設定せよ。</a></h3>
+<p class="hatena">
+以下をmain.cfに追加。</p>
+<pre class="verbatim-soft">
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_local_domain = $myhostname
+smtpd_sasl_application_name = smtpd
+smtpd_sasl_security_options = noanonymous
+smtpd_recipient_restrictions = permit_sasl_authenticated,permit_mynetworks,reject_unauth_destination
+disable_vrfy_command = yes
+</pre>
+<h4><a name="i5">Linuxのユーザを使ってログインする場合</a></h4>
+<p class="hatena">
+/usr/lib64/sasl2/smtpd.confを編集する。(無ければ作成)</p>
+<pre class="verbatim-soft">
+pwcheck_method: saslauthd
+mech_list: plain login
+</pre>
+<p class="hatena">
+/etc/sysconfig/saslauthdを編集する</p>
+<pre class="verbatim-soft">
+MECH=pam
+</pre>
+<p class="hatena">
+/etc/pam.d/smtpを以下のように編集する</p>
+<pre class="verbatim-soft">
+#%PAM-1.0
+auth    required        pam_unix.so     nullok
+account required        pam_unix.so
+</pre>
+<p class="hatena">
+最後にpostfixをrestartすれば完了。</p>
+<h4><a name="i6">メールアカウント用のデータベースを独自に使う場合</a></h4>
+<p class="hatena">
+ユーザ名とパスワードを設定する。</p>
+<pre class="verbatim-soft">
+# saslpasswd2 -u jisshuu2.elec.e.yamagata-u.ac.jp -c 106
+Password:(パスワードを入力)
+Again (for verification):(もう一度パスワード)
+$ sasldblistusers2	//ユーザ情報の確認
+106@jisshuu2.elec.e.yamagata-u.ac.jp: userPassword
+</pre>
+<h3><a name="i7">6.25/tcp, 465/tcp, 587/tcpをどのように使い分けるか。</a></h3>
+<p class="hatena">
+25/tcpは従来通りの平文での通信に利用する。</p>
+<p class="hatena">
+465/tcpは"SMTP over SSL"でのやりとり(最初から全てSSLで暗号化するプロトコル)に利用され、</p>
+<p class="hatena">
+587/tcpは"STARTTLS"でのやりとり(最初は平文で通信し、途中からSSLに切り替えるプロトコル)で利用される。</p>
+<h3><a name="i8">7.メールをやり取りすると、/var/log/maillogには何が記録されるか。実例を示して書式を説明せよ。</a></h3>
+<ul class="list1">
+  <li>送信時</li>
+</ul>
+<pre class="verbatim-soft">
+May 28 00:22:40 jisshuu2 postfix/smtpd[8084]: E7D31300319: client=i220-221-108-253.s42.a006.ap.plala.or.jp[220.221.108.253], sasl_method=PLAIN, sasl_username=106@jisshuu2.elec.e.yamagata-u.ac.jp
+May 28 00:22:42 jisshuu2 postfix/cleanup[8090]: E7D31300319: message-id=<x2v683ayucgqmsb0wsbljum1.1432739970087@email.android.com>
+May 28 00:22:42 jisshuu2 postfix/qmgr[21126]: E7D31300319: from=<106@jisshuu2.elec.e.yamagata-u.ac.jp>, size=599, nrcpt=1 (queue active)
+May 28 00:22:49 jisshuu2 postfix/smtp[8092]: E7D31300319: to=<Segmentation-fault@yandex.ua>, relay=mx.yandex.ru[77.88.21.89]:25, delay=9.1, delays=1.7/0/4.5/2.9, dsn=2.0.0, status=sent (250 2.0.0 Ok: queued on mxfront10o.mail.yandex.net as 1432739981-eAVb6r6L7P-JcfaWRax)
+May 28 00:22:49 jisshuu2 postfix/qmgr[21126]: E7D31300319: removed
+</pre>
+<p class="hatena">
+E7D31300319はキューID(処理するメッセージそれぞれに付けられるID)を表している。</p>
+<table>
+<tr>
+  <td>client</td>
+  <td>接続元</td>
+</tr>
+<tr>
+  <td>sasl_method</td>
+  <td>認証の方式。パスワードをハッシュ化してから送るなど。</td>
+</tr>
+<tr>
+  <td>sasl_username</td>
+  <td>ユーザ名</td>
+</tr>
+<tr>
+  <td>message-id</td>
+  <td>メッセージ一つ一つに付けられるID。全世界でただひとつのものでなければならない。</td>
+</tr>
+<tr>
+  <td>from</td>
+  <td>送り元</td>
+</tr>
+<tr>
+  <td>size</td>
+  <td>メッセージのサイズ</td>
+</tr>
+<tr>
+  <td>nrcpt</td>
+  <td>送る人数</td>
+</tr>
+<tr>
+  <td>to</td>
+  <td>送り先</td>
+</tr>
+<tr>
+  <td>relay</td>
+  <td>送り先に送る為に経由するサーバ</td>
+</tr>
+<tr>
+  <td>delay</td>
+  <td>かかった時間</td>
+</tr>
+<tr>
+  <td>delays</td>
+  <td>queueが処理する前の時間/queueが処理した時間/次のサーバへ送る準備にかかった時間/送るのにかかった時間</td>
+</tr>
+<tr>
+  <td>dsn</td>
+  <td>配送状況の確認</td>
+</tr>
+<tr>
+  <td>status</td>
+  <td>送信がどうなったかの結果</td>
+</tr>
+</table>
+<ul class="list1">
+  <li>受信時</li>
+</ul>
+<pre class="verbatim-soft">
+May 28 00:27:28 jisshuu2 postfix/smtpd[8440]: connect from forward1m.cmail.yandex.net[5.255.216.2]
+May 28 00:27:29 jisshuu2 postfix/smtpd[8440]: setting up TLS connection from forward1m.cmail.yandex.net[5.255.216.2]
+May 28 00:27:29 jisshuu2 postfix/smtpd[8440]: Anonymous TLS connection established from forward1m.cmail.yandex.net[5.255.216.2]: TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits)
+May 28 00:27:30 jisshuu2 postfix/smtpd[8440]: 52F2B30029F: client=forward1m.cmail.yandex.net[5.255.216.2]
+May 28 00:27:30 jisshuu2 postfix/cleanup[8445]: 52F2B30029F: message-id=<2ndu9gl9unre7dj50i9ns9lu.1432740244831@email.android.com>
+May 28 00:27:30 jisshuu2 postfix/qmgr[21126]: 52F2B30029F: from=<Segmentation-fault@yandex.ua>, size=1913, nrcpt=1 (queue active)
+May 28 00:27:30 jisshuu2 postfix/local[8446]: 52F2B30029F: to=<106@jisshuu2.elec.e.yamagata-u.ac.jp>, relay=local, delay=0.38, delays=0.3/0.04/0/0.04, dsn=2.0.0, status=sent (delivered to maildir)
+May 28 00:27:30 jisshuu2 postfix/qmgr[21126]: 52F2B30029F: removed
+May 28 00:27:30 jisshuu2 postfix/smtpd[8440]: disconnect from forward1m.cmail.yandex.net[5.255.216.2]
+</pre>
+<p class="hatena">
+ログの書式は</p>
+<pre class="verbatim-soft">
+(日付日時) (ホスト名) postfix/(処理したプログラム)[(PID)]: (ログの内容)
+</pre>
+<h3><a name="i9">8.smtpで応答に用いられる3桁の数字は何か。特に百の位の意味を説明せよ。</a></h3>
+<table>
+<tr>
+  <td>1..</td>
+  <td>(現在使われていない)</td>
+</tr>
+<tr>
+  <td>2..</td>
+  <td>コマンド成功</td>
+</tr>
+<tr>
+  <td>3..</td>
+  <td>コマンドに成功し、データを送るよう要求されている。</td>
+</tr>
+<tr>
+  <td>4..</td>
+  <td>一時的なエラー</td>
+</tr>
+<tr>
+  <td>5..</td>
+  <td>恒久的なエラー</td>
+</tr>
+</table>
+<p class="hatena">
+以下に一例を示す。</p>
+<pre class="verbatim-soft">
+$ telnet localhost 25
+Trying 133.24.255.82...
+Connected to localhost.
+Escape character is '^]'.
+220 jisshuu2.elec.e.yamagata-u.ac.jp ESMTP unknown
+HELO jisshuu2.elec.e.yamagata-u.ac.jp
+250 jisshuu2.elec.e.yamagata-u.ac.jp
+nyan
+502 5.5.2 Error: command not recognized
+MAIL FROM: nyan@kantei.go.jp
+250 2.1.0 Ok
+RCPT T^Hto^H^H^H
+501 5.5.4 Syntax: RCPT TO:<address>
+RCPT TO: 106@jisshuu2.elec.e.yamagata-u.ac.jp
+250 2.1.5 Ok
+DATA
+354 End data with <CR><LF>.<CR><LF>
+HELL WORLD
+.
+250 2.0.0 Ok: queued as E6C6030029F
+QUIT
+221 2.0.0 Bye
+Connection closed by foreign host.
+</pre>
+<table>
+<tr>
+  <td>220</td>
+  <td>SMTPサーバに接続できた</td>
+</tr>
+<tr>
+  <td>221</td>
+  <td>サーバから切断する(正常終了)</td>
+</tr>
+<tr>
+  <td>250</td>
+  <td>コマンドに成功した</td>
+</tr>
+<tr>
+  <td>354</td>
+  <td>メールの内容を記入するよう求められている</td>
+</tr>
+<tr>
+  <td>501</td>
+  <td>引数の書式が違うなどのエラー</td>
+</tr>
+<tr>
+  <td>502</td>
+  <td>知らないコマンドである</td>
+</tr>
+</table>
+<h3><a name="i10">9.自分宛のメールをサーバに残し、かつ電話機にも転送したいとする。どのように設定すればよいか。</a></h3>
+<p class="hatena">
+.fowardファイルを利用しメールを転送する。</p>
+<p class="hatena">
+ホームディレクトリに".foward"という名前のファイルを作成し、送信したいユーザ名やメールアドレスをコンマ区切りで記入する。</p>
+<p class="hatena">
+なお、自分のユーザ名を記入するときは、先頭に"\"をつけておく。付けないとメールが永遠にループしてしまう。</p>
+<h3><a name="i11">10.TLSが使用できるようにpostfixを設定せよ。</a></h3>
+<p class="hatena">
+keyは前回使ったものを利用した。</p>
+<p class="hatena">
+以下はmain.cfに追加。</p>
+<pre class="verbatim-soft">
+#TLS
+smtpd_use_tls = yes
+smtpd_tls_cert_file = /usr/share/ssl/server.pem	//.crtファイル
+smtpd_tls_key_file = /usr/share/ssl/server.key
+smtpd_tls_loglevel = 1	//0-4の数字を指定。0で無効。数字が大きくなるほどログの量が増える。
+smtpd_tls_session_cache_database = btree:/etc/postfix/smtpd_scache
+</pre>
+<p class="hatena">
+同ディレクトリ内のmaster.cfを開き、以下の行のコメントアウトを外す。</p>
+<pre class="verbatim-soft">
+smtps     inet  n       -       n       -       -       smtpd
+  -o smtpd_tls_wrappermode=yes
+  -o smtpd_sasl_auth_enable=yes
+  -o smtpd_client_restrictions=permit_sasl_authenticated,reject
+</pre>
+<h3><a name="i12">11.MTAでの主な迷惑メール対策（SPF、Greylisting、アドレス検証、Greet pause、その他）について説明せよ。可能なら実際に作動させてみよ。</a></h3>
+<dl>
+  <dt>SPF</dt>
+  <dd>なりすましを防止する</dd>
+</dl>
+<p class="hatena">
+具体的には、DNSのTXTレコードに以下のように設定する。</p>
+<pre class="verbatim-soft">
+v=spf1 +ip4:133.24.255.82 -all
+</pre>
+<p class="hatena">
+この設定は、ここで指定したIPアドレスのSMTPサーバとドメインを紐付けるものである。</p>
+<p class="hatena">
+このレコードに載っていないIPアドレスから送られてきたメールはドメインを偽っていると判断できる。</p>
+<dl>
+  <dt>Greylisting</dt>
+  <dd>相手がプロトコルに則った反応をするのか検証する。</dd>
+</dl>
+<p class="hatena">
+アクセスを試みてきたクライアントに対し、一度"4.."系のエラーを返す。</p>
+<p class="hatena">
+通常のメーラーであれば数秒後にメールを再送するが、スパムメールの多くは一度の試行だけで再送を行わないため、結果的に弾くことができる。</p>
+<p class="hatena">
+簡単にスパムメールを弾くことができるが、当然ながら遅延が発生してしまう。</p>
+<dl>
+  <dt>アドレス検証</dt>
+  <dd>存在するユーザか確認する</dd>
+</dl>
+<p class="hatena">
+一度送られてきたメールに対し、そのメールの宛先が存在するのか確認する。</p>
+<p class="hatena">
+存在することが確認されるまでの間、その送り手からのメール送信はブロックされる。</p>
+<p class="hatena">
+存在するかわからない宛先に、無差別に送信しようとしているようなスパムメールに有効である。</p>
+<dl>
+  <dt>Greet pause</dt>
+  <dd>相手の応答がゆとりあるものか確認する</dd>
+</dl>
+<p class="hatena">
+SMTPサーバに接続すると、まず最初に</p>
+<pre class="verbatim-soft">
+220 jisshuu2.elec.e.yamagata-u.ac.jp ESMTP unknown
+</pre>
+<p class="hatena">
+というようなメッセージが返ってくる。</p>
+<p class="hatena">
+通常のメーラーであればこのメッセージが返ってくるのを待ち、受信したら次のコマンドを送るようになっている。</p>
+<p class="hatena">
+しかし、スパムメールであればその間を取らず、220コードが返ってくる前提で次のコマンドを送る傾向にある。</p>
+<p class="hatena">
+これを逆手に取り、220コードを返す前に送られてきたコマンドをエラーとして処理するようにすれば、スパムメールの送信を妨げることができる。</p>
+
+<hr>
+<div class="footer">
+Generated by <a href="http://www2u.biglobe.ne.jp/~MAS/soft.html#htwiki">ひとりWiki</a> version 2.5.0
+</div>
+</body>
+</html>

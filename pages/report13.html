@@ -1,0 +1,228 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>第十三回レポート</title>
+<link rel="stylesheet" href="css/watery-blue/wiki.css" type="text/css">
+</head>
+<body>
+<h1>第十三回レポート</h1>
+<h3><a name="i0">1.IPv6とは? IPv4とは?</a></h3>
+<dl>
+  <dt>IPv6</dt>
+  <dd></dd>
+</dl>
+<p class="hatena">
+IPv6は、IPアドレスが枯渇しつつあるIPv4に変わるものとして作られたプロトコルである。</p>
+<p class="hatena">
+2の128乗の数のIPアドレスを存在させることができ、IPv4で起きていたIPアドレスの枯渇問題を解消することができる。</p>
+<dl>
+  <dt>IPv4</dt>
+  <dd></dd>
+</dl>
+<p class="hatena">
+IPv4は、現在のネットワークで主に使われているプロトコルである。2の32乗の数のIPアドレスが存在するが、現在の利用状況を顧みると近い将来に枯渇してしまうとされている。</p>
+<p class="hatena">
+山形大学に割り当てられたIPv4アドレスの範囲は133.24.0.0/16である。</p>
+<h3><a name="i1">2.IPv6に盛り込まれた新機能</a></h3>
+<p class="hatena">
+IPv6に盛り込まれた機能の中で特筆すべきものとして、IPv6アドレスの割り当て機能がある。IPv4でIPv4アドレスを自動的に割り当てるにはDHCPサーバなどを建てる必要があったが、IPv6アドレスではその必要がない。</p>
+<p class="hatena">
+また、潤沢に存在するIPv6は全ての機器に割り当てることができ、ルータでNAT超えの設定をすることなく通信することが出来る。</p>
+<h3><a name="i2">3.IPv6アドレスの構造と表記方法</a></h3>
+<pre class="verbatim-soft">
+2001:2f8:3a:300:8e89:a5ff:fe1e:fc66
+</pre>
+<p class="hatena">
+IPv6アドレスは、128bitのアドレスを16bitごとに":"で区切って表されている。</p>
+<p class="hatena">
+分けられているものそれぞれで、先頭の0を省くことができる。上のIPv6アドレスを省かずに表すとこうなる。</p>
+<pre class="verbatim-soft">
+2001:02f8:003a:0300:8e89:a5ff:fe1e:fc66
+</pre>
+<p class="hatena">
+また、連続している0の部分は省くことができる。</p>
+<pre class="verbatim-soft">
+ 0000:0000:0000:0000:0000:0000:0000:0001	//ループバックアドレス。IPv4の127.0.0.1にあたる
+ 0:0:0:0:0:0:0:1
+ ::1
+</pre>
+<p class="hatena">
+上の3つの表記はどれでも同じである。</p>
+<p class="hatena">
+ただし、連続した0が複数ある場合、連続が長い方を省略する。</p>
+<pre class="verbatim-soft">
+ 0000:0000:0000:0000:0001:0000:0000:0001
+ ::1:0:0:1
+</pre>
+<p class="hatena">
+ブラウザなどでIPv6アドレスを指定する場合は、IPv6アドレスを"[]"で囲んで表記する(ポートかアドレスの一部かを判断しづらいため)。</p>
+<pre class="verbatim-soft">
+http://[::1]/
+http://[2001:2f8:3a:300:8e89:a5ff:fe1e:fc66]/
+</pre>
+<h3><a name="i3">4.IPv6アドレスと経路が自動的に設定される仕組み</a></h3>
+<p class="hatena">
+128bitあるIPv6アドレスのうち、上位64bitはプリフィックスと呼ばれており、ICMPv6でRS/RAの応酬で決定される。</p>
+<p class="hatena">
+そして下位64bitはインターフェイスIDと呼ばれ、手動で適当に設定することも(アドレスの衝突を検知する機能がIPv6には備わっている)できるが、基本的にはMACアドレスから生成する。生成する手順は以下のとおりである。</p>
+<p class="hatena">
+(元のMACアドレスを"90:E6:BA:93:B4:21"とする。)</p>
+<ul class="list1">
+  <li>1.MACアドレスの中央の部分に"FFFE"を追加する。</li>
+</ul>
+<pre class="verbatim-soft">
+90E6BAFFFE93B421
+</pre>
+<ul class="list1">
+  <li>2.上から7バイト目のビットを反転させる。</li>
+</ul>
+<p class="hatena">
+十六進数90を二進数で表すと10010000であるので、反転させた後は10010010、十六進数の92になる。</p>
+<pre class="verbatim-soft">
+92E6BAFFFE93B421
+92E6:BAFF:FE93:B421
+</pre>
+<p class="hatena">
+これがIPv6アドレスの下位32bitとなる。</p>
+<br>
+<p class="hatena">
+このように、IPv6ではIPアドレスの割り当てをDHCPなどで管理することなしに割り当てることができる。</p>
+<h3><a name="i4">5.http://www.kame.netの表示</a></h3>
+<p class="hatena">
+踊る亀が表示され、IPv6で通信していることが確認できた。</p>
+<h3><a name="i5">6.外の世界にping6,traceroute6</a></h3>
+<p class="hatena">
+"ipv6.2chan.net"にping6した。</p>
+<pre class="verbatim-soft">
+$ ping6 ipv6.2chan.net
+PING ipv6.2chan.net(2401:2500:103:b:133:242:11:142) 56 データ長(byte)
+64 バイト応答 送信元 2401:2500:103:b:133:242:11:142: icmp_seq=1 ttl=56 時間=31.9ミリ秒
+64 バイト応答 送信元 2401:2500:103:b:133:242:11:142: icmp_seq=2 ttl=56 時間=31.7ミリ秒
+64 バイト応答 送信元 2401:2500:103:b:133:242:11:142: icmp_seq=3 ttl=56 時間=32.1ミリ秒
+64 バイト応答 送信元 2401:2500:103:b:133:242:11:142: icmp_seq=4 ttl=56 時間=30.4ミリ秒
+64 バイト応答 送信元 2401:2500:103:b:133:242:11:142: icmp_seq=5 ttl=56 時間=30.5ミリ秒
+64 バイト応答 送信元 2401:2500:103:b:133:242:11:142: icmp_seq=6 ttl=56 時間=30.1ミリ秒
+64 バイト応答 送信元 2401:2500:103:b:133:242:11:142: icmp_seq=7 ttl=56 時間=31.4ミリ秒
+^C
+ --- ipv6.2chan.net ping 統計 ---
+送信パケット数 7, 受信パケット数 7, パケット損失 0%, 時間 6008ミリ秒
+rtt 最小/平均/最大/mdev = 30.148/31.204/32.169/0.788ミリ秒
+</pre>
+<p class="hatena">
+traceroute6の結果は以下の通り。</p>
+<pre class="verbatim-soft">
+$ traceroute6 ipv6.2chan.net
+traceroute to ipv6.2chan.net (2401:2500:103:b:133:242:11:142), 30 hops max, 80 byte packets
+ 1  phys.v6.e.yamagata-u.ac.jp (2001:2f8:3a:300::1)  0.508 ms  0.493 ms  0.481 ms
+ 2  2001:2f8:1::d (2001:2f8:1::d)  13.743 ms  13.746 ms  13.752 ms
+ 3  tokyo-dc-gm1-ae0-vlan10.s4.sinet.ad.jp (2001:2f8:fff0:c::2)  13.731 ms  13.729 ms  13.719 ms
+ 4  2001:7fa:7:1::4713:1 (2001:7fa:7:1::4713:1)  14.718 ms  14.687 ms  14.683 ms
+ 5  2001:380:8050:2c::1 (2001:380:8050:2c::1)  14.124 ms 2001:380:8230:18::1 (2001:380:8230:18::1)  14.118 ms  14.107 ms
+ 6  2001:380:8150:f::2 (2001:380:8150:f::2)  14.340 ms  14.117 ms  14.113 ms
+ 7  2001:380:a300:5::1 (2001:380:a300:5::1)  16.407 ms  16.461 ms  16.415 ms
+ 8  2001:380:a300:8::2 (2001:380:a300:8::2)  30.840 ms  30.808 ms  30.808 ms
+ 9  2001:380:9400:10::2 (2001:380:9400:10::2)  28.924 ms  28.933 ms  28.915 ms
+10  2001:380:0:2210::2 (2001:380:0:2210::2)  31.141 ms  31.112 ms  31.111 ms
+11  iskrt1s-rt2.bb.sakura.ad.jp (2001:e47:c000:15::2)  30.103 ms iskrt2s-rt2.bb.sakura.ad.jp (2001:e47:c000:16::2)  30.400 ms iskrt1s-rt2.bb.sakura.ad.jp (2001:e47:c000:15::2)  30.018 ms
+12  iskrt101b-rt2s-1.bb.sakura.ad.jp (2001:e47:c000:5::2)  32.381 ms iskrt102b-rt2s-2.bb.sakura.ad.jp (2001:e47:c000:27::2)  32.373 ms iskrt101b-rt1s-2.bb.sakura.ad.jp (2001:e47:c000:24::2)  32.318 ms
+13  iskrt121e-rt101b.bb.sakura.ad.jp (2001:e47:c000:36::2)  30.786 ms iskrt122e-rt102b.bb.sakura.ad.jp (2001:e47:c000:39::2)  30.043 ms iskrt121e-rt101b.bb.sakura.ad.jp (2001:e47:c000:36::2)  30.784 ms
+14  2401:2500:103:b:133:242:11:142 (2401:2500:103:b:133:242:11:142)  30.420 ms  30.500 ms  30.206 ms
+</pre>
+<h3><a name="i6">7.namedにIPv6アドレスを設定する</a></h3>
+<p class="hatena">
+ゾーンファイルにAAAAレコードを追加する。</p>
+<pre class="verbatim-soft">
+@ IN AAAA 2001:2f8:3a:300:8e89:a5ff:fe1e:fc66
+</pre>
+<p class="hatena">
+namedを再起動した後、digコマンドで確かめる。</p>
+<pre class="verbatim-soft">
+$ dig www.elec.e.yamagata-u.ac.jp aaaa
+(略)
+;; ANSWER SECTION:
+www.elec.e.yamagata-u.ac.jp. 3600 IN	AAAA	2001:2f8:3a:300:8e89:a5ff:fe1e:fc66
+(略)
+</pre>
+<h3><a name="i7">8.namedでIPv6を使う</a></h3>
+<p class="hatena">
+/etc/named.confにlisten-on-v6を設定する。</p>
+<pre class="verbatim-soft">
+listen-on-v6 port 53 {::1;};
+</pre>
+<h3><a name="i8">9.ApacheでIPv6を使う。</a></h3>
+<p class="hatena">
+httpd.confのListenディレクティブにアドレスを指定していなければ、IPv4・IPv6両方で通信できる。</p>
+<pre class="verbatim-soft">
+Listen 80
+</pre>
+<p class="hatena">
+そのままの状態で<a href="http://[::1]/">http://[::1]/</a> が表示できた。</p>
+<h3><a name="i9">10.PostfixとSylpheedでIPv6を使う。メールのヘッダで確認。</a></h3>
+<p class="hatena">
+main.cfに"inet_protocols = ipv6"を追記してpostfixを再起動する。</p>
+<p class="hatena">
+自分自身にメールを送信した。</p>
+<pre class="verbatim-soft">
+Return-Path: <106@www.elec.e.yamagata-u.ac.jp>
+X-Original-To: 106@www.elec.e.yamagata-u.ac.jp
+Delivered-To: 106@www.elec.e.yamagata-u.ac.jp
+Received: from localhost (unknown [IPv6:2001:2f8:3a:300:8e89:a5ff:fe1e:fc66])
+	by jisshuu2.elec.e.yamagata-u.ac.jp (Postfix) with ESMTPSA id 5565E300473
+	for <106@www.elec.e.yamagata-u.ac.jp>; Thu, 23 Jul 2015 12:11:52 +0900 (JST)
+Date: Thu, 23 Jul 2015 12:11:52 +0900
+From: =?ISO-2022-JP?B?GyRCPiFLchsoQiAbJEJNeD0hGyhC?= <106@www.elec.e.yamagata-u.ac.jp>
+To: 106@www.elec.e.yamagata-u.ac.jp
+Subject: sasasa
+Message-Id: <20150723121152.2bfec8a3702f9ee3a6f91160@www.elec.e.yamagata-u.ac.jp>
+X-Mailer: Sylpheed 3.4.2 (GTK+ 2.24.4; x86_64-unknown-linux-gnu)
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+sasasa
+ -- 
+106 <106@www.elec.e.yamagata-u.ac.jp>
+</pre>
+<p class="hatena">
+ヘッダ中にサーバのIPv6アドレスが存在するため、IPv6で通信できていると考えられる。</p>
+<h3><a name="i10">11.sshでIPv6を使う</a></h3>
+<p class="hatena">
+sshd_configに"ListenAddress ::"を書き込みsshdを再起動する。</p>
+<pre class="verbatim-soft">
+[106@jisshuu1 ~]$ ssh -6 106@www.elec.e.yamagata-u.ac.jp
+The authenticity of host 'www.elec.e.yamagata-u.ac.jp (2001:2f8:3a:300:8e89:a5ff:fe1e:fc66)' can't be established.
+ECDSA key fingerprint is 55:07:75:30:25:f8:a7:7e:72:ed:f6:b5:d6:38:e0:f6.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added 'www.elec.e.yamagata-u.ac.jp,2001:2f8:3a:300:8e89:a5ff:fe1e:fc66' (ECDSA) to the list of known hosts.
+106@www.elec.e.yamagata-u.ac.jp's password:
+Last login: Thu Jul 23 00:54:02 2015 from p23071-ipngn601imazuka.yamagata.ocn.ne.jp
+</pre>
+<h3><a name="i11">12.その他全ての通信をIPv6で行うようにする</a></h3>
+<ul class="list1">
+  <li>nginxをIPv6に対応する</li>
+</ul>
+<p class="hatena">
+/etc/nginx/sites.d/defaultを編集する。</p>
+<pre class="verbatim-soft">
+(略)
+    listen	81;
+    listen	[::1]:81;
+(略)
+</pre>
+<p class="hatena">
+nginxを再起動した後に、<a href="http://[::1]:81/">http://[::1]:81/</a> で表示できることを確認できた。</p>
+<ul class="list1">
+  <li>dovecotをIPv6に対応する</li>
+</ul>
+<p class="hatena">
+/etc/dovecot/dovecot.confのコメントアウトを外すだけで対応できた。</p>
+<pre class="verbatim-soft">
+listen = *,::
+</pre>
+
+<hr>
+<div class="footer">
+Generated by <a href="http://www2u.biglobe.ne.jp/~MAS/soft.html#htwiki">ひとりWiki</a> version 2.6.0
+</div>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>第三回レポート</title>
+<link rel="stylesheet" href="css/watery-blue/wiki.css" type="text/css">
+</head>
+<body>
+<h1>第三回レポート</h1>
+<h3><a name="i0">1.利用者から信頼される管理者になるための心構え</a></h3>
+<p class="hatena">
+最も重要なことは「管理者権限を濫用しない」ことである。</p>
+<p class="hatena">
+管理者はその権限上、マシンに存在するすべてのファイルを読むことができる。もちろんその中には他のユーザがやりとりしたメールや、他ユーザのファイルも含まれている。管理者には誘惑を振り切り必要なファイルだけを読み書きする気持ちが必要不可欠だ。盗み見をする人物は信頼されないだろう。</p>
+<p class="hatena">
+そして次に重要なのが「安全なサーバを稼働させること」だ。</p>
+<p class="hatena">
+日々ソフトウェアの更新を確認し、危険な脆弱性が発見されたら対策されるまで利用を見合わせるなど、サーバーの防衛をきちんと出来ない管理者であれば、情報流出などを引き起こし、当然利用者からの信頼は消えてしまう。</p>
+<h3><a name="i1">2.一人ずつ利用者登録をする理由</a></h3>
+<p class="hatena">
+今回利用した「useradd」というコマンドの他にも「newusers」というコマンドが存在する。ユーザ名とパスワードを/etc/passwdの要領で書かれたテキストファイルを用意すればこのコマンドで一括登録することが出来るのだが、平文で書かれたパスワードがディスク上に残ってしまうことを考えると利用すべきでない。また、/etc/skel以下のファイルがホームディレクトリにコピーされないなど、細かな差異を知っておく必要もある。</p>
+<h3><a name="i2">3.自分のサーバで全員分の利用者登録・初期パスワードの設定</a></h3>
+<p class="hatena">
+コマンド「useradd」を利用して利用者登録をする。</p>
+<pre class="verbatim-soft">
+# useradd (ユーザ名)
+</pre>
+<p class="hatena">
+その後、コマンド「passwd」を利用してパスワードを設定する。</p>
+<pre class="verbatim-soft">
+# passwd (ユーザ名)
+ ユーザー (ユーザ名) のパスワードを変更。
+ 新しいパスワード:(パスワードを入力)
+ 新しいパスワードを再入力してください:(パスワードを入力)
+ passwd: 全ての認証トークンが正しく更新できました。
+</pre>
+<h3><a name="i3">4.他サーバにsshで遠隔ログインし、パスワードを自分のものに変更する</a></h3>
+<p class="hatena">
+パスワードを利用したsshでのログインは</p>
+<pre class="verbatim-soft">
+$ ssh (ユーザ名)@(IPアドレスorホスト名)
+</pre>
+<p class="hatena">
+でできる。</p>
+<p class="hatena">
+3.と同じようにpasswdを利用する。</p>
+<p class="hatena">
+変更するパスワードは自分自身のものなので管理者権限は必要ない。</p>
+<h3><a name="i4">5.コマンドの意味を調べ会得する</a></h3>
+<dl>
+  <dt>useradd</dt>
+  <dd>ユーザの追加。</dd>
+</dl>
+<pre class="verbatim-soft">
+# useradd (ユーザ名)
+</pre>
+<p class="hatena">
+本来は-mをつけてホームディレクトリを自動生成させるのだが、つけなくても自動生成された。</p>
+<dl>
+  <dt>userdel</dt>
+  <dd>ユーザの削除を行う。</dd>
+</dl>
+<pre class="verbatim-soft">
+# userdel (ユーザ名)
+# userdel -r (ユーザ名)   //ホームディレクトリも削除する場合
+</pre>
+<dl>
+  <dt>passwd</dt>
+  <dd>パスワードの変更ができる。</dd>
+</dl>
+<pre class="verbatim-soft">
+$ passwd 			//自分のパスワードを変更
+# passwd (ユーザ名)	//指定したユーザのパスワードを変更する。管理者のみ。	
+</pre>
+<dl>
+  <dt>chfn</dt>
+  <dd>ユーザー情報の設定をする</dd>
+</dl>
+<pre class="verbatim-soft">
+$ chfn
+(ユーザ名) の finger 情報を変更します。
+パスワード:(パスワード入力)
+名前 []: (本名)		//[]内は現在の値が入るらしい
+オフィス []: (オフィス)
+オフィスの電話 []: (オフィスの電話)
+自宅の電話 []: (自宅の電話)
+<br>
+finger 情報を変更しました。
+</pre>
+<dl>
+  <dt>chsh</dt>
+  <dd>ログイン時のシェルを変更する。</dd>
+</dl>
+<pre class="verbatim-soft">
+$ chsh -s /bin/sh	//シェルをshに変更する
+</pre>
+<p class="hatena">
+シェルについては次週の実習でやるようなので割愛する。</p>
+<dl>
+  <dt>ssh</dt>
+  <dd>sshで他のサーバーにログインする。</dd>
+</dl>
+<pre class="verbatim-soft">
+$ ssh (他サーバのユーザ名)@(IPアドレス/ホスト名)
+$ ssh -p (ポート) (他サーバのユーザ名)@(IPアドレス/ホスト名)	//SSHのポートが22でない場合は-pで指定する。
+$ ssh -i (秘密鍵へのパス) (他サーバのユーザ名)@(IPアドレス/ホスト名)	//公開鍵暗号方式で認証する場合
+</pre>
+<dl>
+  <dt>who</dt>
+  <dd>誰が今ログインしているのか調べる</dd>
+</dl>
+<pre class="verbatim-soft">
+$ who
+106      pts/1        2015-05-08 00:18 (i220-221-108-213.s42.a006.ap.plala.or.jp)
+106      tty7         2015-05-01 12:25 (:0)
+106      pts/0        2015-05-07 18:17 (:0.0)
+futoshishi tty8         2015-05-01 20:50 (:1)
+$ who -m	//自分自身のみ表示
+</pre>
+<dl>
+  <dt>last</dt>
+  <dd>最近ログインしたユーザの詳細を表示する</dd>
+</dl>
+<pre class="verbatim-soft">
+$ last
+106      pts/1        i220-221-108-213 Fri May  7 20:18   still logged in
+(略)
+</pre>
+<dl>
+  <dt>finger(pinky)</dt>
+  <dd>chfnで登録されたデータを表示する…がこのVineLinuxにはインストールされていない。代わりにpinkyコマンドを利用する。</dd>
+</dl>
+<pre class="verbatim-soft">
+$ pinky
+ログイン 名前              端末    待機 開始時刻     ログイン元
+106      勝亦 利宗        pts/1           2015-05-08 20:18 i220-221-108(略)
+$ pinky -l (ユーザ名)	//もっと詳しく表示する
+ログイン名: (ユーザ名)                         実名:  (実名)
+ディレクトリ/home/(ユーザ名)                   シェル:  (シェル)
+</pre>
+<dl>
+  <dt>chmod</dt>
+  <dd>ファイルの閲覧/書き込み/実行ができる人物を設定する。modeの指定には記号による表記や八進数での表記が使える。</dd>
+</dl>
+<ul class="list1">
+  <li>記号による表記</li>
+</ul>
+<table>
+<tr>
+  <td>u,g,o,a</td>
+  <td>それぞれファイル所有者,グループの人,その他の人,全員を表す</td>
+</tr>
+<tr>
+  <td>+,-,=</td>
+  <td>権限の付加,削除,代入を表す</td>
+</tr>
+<tr>
+  <td>r,w,x</td>
+  <td>読み込み,書き込み,実行権限を表す</td>
+</tr>
+</table>
+<ul class="list1">
+  <li>八進数での表記</li>
+</ul>
+<table>
+<tr>
+  <td>7</td>
+  <td>rwx</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td>rw-</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td>r-x</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td>r--</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td>-ww</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td>-w-</td>
+</tr>
+<tr>
+  <td>1</td>
+  <td>--x</td>
+</tr>
+<tr>
+  <td>0</td>
+  <td>---</td>
+</tr>
+</table>
+<p class="hatena">
+この数字を３つ、(所有者)(グループ)(他人)の順に並べて表記する。</p>
+<p class="hatena">
+以下よく使う例を示す。</p>
+<pre class="verbatim-soft">
+# chmod a+r (ファイル名)	//全員に読み込み権限を与える。
+# chmod a=r (ファイル名)	//全員に読み込み権限のみ与える。
+# chmod 644 (ファイル名)	//書き込みは所有者のみ、読み込みはだれでも
+# chmod 755 (ファイル名)	//実行は所有者のみ、読み込み・書き込み権限はだれでも
+# chmod -R 644 (ディレクトリ名)	//ディレクトリとその内のファイルの権限をすべて644にする
+</pre>
+<dl>
+  <dt>chown</dt>
+  <dd>ファイルの所有者・所有グループを変更する。</dd>
+</dl>
+<pre class="verbatim-soft">
+# chown (ユーザ名) (ファイル名)
+# chown :(グループ名) (ファイル名)
+# chown (ユーザ名):(グループ名) (ファイル名)
+</pre>
+<dl>
+  <dt>chgrp</dt>
+  <dd>ファイルの所有グループを変更する。</dd>
+</dl>
+<pre class="verbatim-soft">
+# chgrp (グループ名) (ファイル名)
+</pre>
+<p class="hatena">
+chownとの特筆すべき違いは無い。</p>
+<h3><a name="i5">6.以下のファイルの使用目的</a></h3>
+<dl>
+  <dt>/etc/passwd</dt>
+  <dd>マシンに登録されているユーザの一覧を見ることができるファイル。書き込みは管理者のみだが、だれでも読むことができる。</dd>
+  <dt>/etc/shadow</dt>
+  <dd>passwdファイルに暗号化されたパスワードを足して載せたファイル。パスワードの解析を防ぐために管理者のみ読むことができる。</dd>
+  <dt>/etc/group</dt>
+  <dd>マシンに存在するグループの一覧を見ることができる。</dd>
+  <dt>/etc/skel/</dt>
+  <dd>新しくユーザを追加した時、ホームディレクトリに生成されるものが入っている。ホームディレクトリのひな形。</dd>
+</dl>
+<h3><a name="i6">7./etc/passwd、/etc/shadow、/etc/groupの書式（行中の「:」で区切られた各欄の意味）を説明せよ。</a></h3>
+<ul class="list1">
+  <li>/etc/passwd</li>
+</ul>
+<pre class="verbatim-soft">
+(ユーザ名):(パスワード):(ユーザID):(グループID):(本名など):(ホームディレクトリ):(ログインシェル)
+</pre>
+<p class="hatena">
+パスワードはシャドウパスワードを利用している場合「x」である。</p>
+<p class="hatena">
+(本名など)の欄には、chfnで設定したものが(オフィス),(オフィス電話番号),(自宅電話番号)の形式で記入されている。</p>
+<ul class="list1">
+  <li>/etc/shadow</li>
+</ul>
+<pre class="verbatim-soft">
+(ユーザ名):(暗号化されたパスワード):(パスワードを変更した日付):(パスワードを変更の最短経過日数):(同じパスワードで居られる日数):(その日数までの警告開始日数):(ログインしていないとユーザが消える日数):(ユーザの有効期限):
+</pre>
+<p class="hatena">
+日付には1970年1月1日からの日数が入っている。</p>
+<p class="hatena">
+useraddでユーザを作った場合、後半5つの値にはデフォルトの値が代入されている。</p>
+<ul class="list1">
+  <li>/etc/group</li>
+</ul>
+<pre class="verbatim-soft">
+(グループ名):(グループのパスワード):(グループID):(グループに所属するユーザ)
+</pre>
+<p class="hatena">
+ユーザはカンマ(,)で区切られて記入されている。</p>
+<p class="hatena">
+/etc/passwdに対する/etc/shadowと同じように、グループのパスワードが暗号化されていれば/etc/groupに対する/etc/gshadowが存在する。</p>
+
+<hr>
+<div class="footer">
+Generated by <a href="http://www2u.biglobe.ne.jp/~MAS/soft.html#htwiki">ひとりWiki</a> version 2.5.0
+</div>
+</body>
+</html>
