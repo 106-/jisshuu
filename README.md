@@ -1,6 +1,6 @@
 # jisshuu
 
-山形大学Linux実習で作ったレポートを置く場所
+2015年度の山形大学Linux実習で作ったレポートを置く場所
 
 https://106-.github.io/jisshuu/
 
