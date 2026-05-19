@@ -7,3 +7,4 @@ https://106-.github.io/jisshuu/
 ※歴史的遺物です。間違いや時代遅れが含まれている可能性がとてもあります。
 
 ![ONE WAY](ONE_WAY.png)
+([撮影場所](https://maps.app.goo.gl/HuCJ8UyydzxCmsCT6))
